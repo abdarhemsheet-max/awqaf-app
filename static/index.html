@@ -46,7 +46,7 @@ input[type=range]{accent-color:var(--g2)}
 .btn:disabled{opacity:.7;cursor:wait;transform:none}
 .btn.alt{background:#fff;color:var(--g);border:1px solid #b9c7bd;box-shadow:none;font-weight:500}
 .btn.alt:hover{background:var(--g3)}
-.btn.wa{background:linear-gradient(135deg,#2bc16b,#128c4a);color:#fff}.btn.gold{background:linear-gradient(135deg,#d1a444,var(--gold));color:#2b1f06}
+.btn.rec{background:linear-gradient(135deg,#d93025,#a50e0e)!important;color:#fff!important;animation:pulse 1.2s infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px #d9302533}}.btn.wa{background:linear-gradient(135deg,#2bc16b,#128c4a);color:#fff}.btn.gold{background:linear-gradient(135deg,#d1a444,var(--gold));color:#2b1f06}
 #gen{padding:13px 16px;font-size:16.5px;letter-spacing:.2px}
 #mic{padding:13px 14px}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -243,8 +243,26 @@ $("#popGo").onclick=async()=>{if(!sr)return;const req=$("#popIn").value.trim();i
   sr.deleteContents();const m=document.createElement("span");m.style.background="#e3f4e7";m.innerHTML=j.text;sr.insertNode(m);
   $("#pop").style.display="none";getSelection().removeAllRanges();fitCheck();toast("تم تعديل الجزء")}
  catch(e){toast("تعذر: "+e.message)}$("#popGo").textContent="طبّق"};
-$("#mic").onclick=()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return toast("المتصفح هنا ما يدعم الصوت، في النسخة الحقيقية يعمل");
- try{const r=new R();r.lang="ar-LY";r.onresult=e=>{$("#topic").value+=" "+e.results[0][0].transcript};r.onerror=()=>toast("تعذر الميكروفون هنا");r.start();toast("تكلم الحين…")}catch(x){toast("تعذر الميكروفون هنا")}};
+let REC=null,RECON=false,baseTxt="",micLi=0;const MICL=["ar-LY","ar-SA"];
+function setMic(on){const b=$("#mic");b.classList.toggle("rec",on);b.innerHTML=on?"⏹ إيقاف":"🎙 تكلم"}
+function micStop(){RECON=false;try{REC&&REC.stop()}catch(e){}setMic(false)}
+const MICERR={"not-allowed":"المايك ممنوع: اسمح للموقع باستعمال الميكروفون من أيقونة القفل جنب الرابط","service-not-allowed":"المتصفح منع خدمة الصوت، جرّب Chrome","no-speech":"ما سمعتش صوت، اضغط وأعد المحاولة","audio-capture":"ما لقيتش ميكروفون في الجهاز","network":"الصوت يحتاج اتصال إنترنت"};
+$("#mic").onclick=()=>{
+ const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!R)return toast("هذا المتصفح ما يدعم الصوت. استعمل Chrome، أو زر المايك في لوحة مفاتيح الجوال");
+ if(RECON)return micStop();
+ const t=$("#topic");baseTxt=t.value.trim();micLi=0;
+ const start=()=>{const r=new R();REC=r;r.lang=MICL[micLi];r.continuous=true;r.interimResults=true;r.maxAlternatives=1;let fin="";
+  r.onstart=()=>{RECON=true;setMic(true);toast("تكلم الحين… واضغط «إيقاف» لما تخلص")};
+  r.onresult=e=>{let it="";for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)fin+=x[0].transcript+" ";else it+=x[0].transcript}
+   t.value=(baseTxt?baseTxt+" ":"")+fin+it};
+  r.onerror=e=>{if(r!==REC)return;
+   if(e.error==="language-not-supported"&&micLi<MICL.length-1){micLi++;RECON=false;start();return}
+   if(e.error==="aborted")return;
+   RECON=false;setMic(false);toast(MICERR[e.error]||"تعذر الميكروفون: "+e.error)};
+  r.onend=()=>{if(r!==REC)return;if(RECON){baseTxt=t.value.trim();try{start()}catch(x){RECON=false;setMic(false)}}else setMic(false)};
+  try{r.start()}catch(x){RECON=false;setMic(false);toast("تعذر تشغيل المايك")}};
+ start()};
 let CCH="",N1="",N2="";
 function drawBottom(){
  const d=new Date(),ds=`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")}`;
