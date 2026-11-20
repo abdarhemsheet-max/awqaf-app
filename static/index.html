@@ -157,7 +157,8 @@ function blocksToHtml(bl){return dg(bl.map(b=>{const h=FRAG(b.html||"");
 let last=null;
 const STATIC=/github\.io$/.test(location.hostname)||location.search.includes("static");
 const KEYN="awq_gkey",GMODELS=["gemini-3-flash-preview","gemini-flash-latest","gemini-3.1-flash-lite"];
-const getKey=()=>{try{return localStorage.getItem(KEYN)||""}catch(e){return""}};
+const EMBED_KEY="__GEMINI_KEY__";
+const getKey=()=>{let k="";try{k=localStorage.getItem(KEYN)||""}catch(e){}return k||(EMBED_KEY.startsWith("__")?"":EMBED_KEY)};
 function setKey(){const k=prompt("الصق مفتاح Gemini API (يتحفظ في هذا المتصفح فقط):",getKey());if(k===null)return false;try{localStorage.setItem(KEYN,k.trim())}catch(e){}return !!k.trim()}
 if(STATIC){const b=document.getElementById("tKey");b.style.display="";b.onclick=setKey}
 async function gem(file,user,temp){let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
