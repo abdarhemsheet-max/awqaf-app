@@ -18,6 +18,7 @@ def read(p):
 
 SYSTEM = read("prompts/system_prompt.md")
 EDIT = read("prompts/edit_prompt.md")
+TABLE = read("prompts/table_prompt.md")
 
 LOGIN = """<!doctype html><html lang=ar dir=rtl><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>دخول</title><body style="font-family:sans-serif;background:#eef1ee;display:grid;place-items:center;height:100vh;margin:0">
@@ -104,6 +105,20 @@ def edit():
             return jsonify(text=sel + " (معدّل: " + req + ")")
         user = f"السياق (المراسلة كاملة):\n{ctx}\n\nالجزء المطلوب تعديله:\n{sel}\n\nالطلب: {req}"
         return jsonify(gemini(EDIT, user, 0.5))
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
+@app.post("/api/table")
+@need_login
+def table():
+    d = request.json or {}
+    req, ctx = d.get("request", "").strip(), d.get("context", "")
+    if not req:
+        return jsonify(error="ناقص"), 400
+    try:
+        if MOCK:
+            return jsonify(headers=["م", "الاسم", "الملاحظات"], rows=[["1", "{{فراغ}}", ""], ["2", "{{فراغ}}", ""]])
+        return jsonify(gemini(TABLE, "\n".join(["السياق (المراسلة):", ctx, "", "المطلوب: " + req]), 0.3))
     except Exception as e:
         return jsonify(error=str(e)), 500
 
