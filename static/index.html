@@ -286,7 +286,7 @@ $("#q").oninput=list;
 function view(n){$("#mainView").classList.toggle("hid",!n);$("#arcView").classList.toggle("hid",!!n);$("#tNew").classList.toggle("on",!!n);$("#tArc").classList.toggle("on",!n);if(n)setTimeout(()=>{scale();fitCheck()},30)}
 $("#tNew").onclick=()=>view(1);$("#tArc").onclick=()=>view(0);
 window.onresize=()=>{scale()};
-$("#topic").value="نبي نكلف محمد لطرش يغطي زيارة رئيس الهيئة، وينشر المادة مباشرة على صفحة المكتب";drawBottom();$("#gen").click();list();
+drawBottom();list();
 document.fonts.ready.then(()=>{$("#fit").click()});
 </script>
 </body></html>
