@@ -4,11 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>منشئ مراسلات الأوقاف</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family:"Amiri";src:url(static/fonts/Amiri-Regular.ttf);font-weight:400}
+@font-face{font-family:"Amiri";src:url(static/fonts/Amiri-Bold.ttf);font-weight:700}
+@font-face{font-family:"Tajawal";src:url(static/fonts/Tajawal-Regular.ttf);font-weight:400}
+@font-face{font-family:"Tajawal";src:url(static/fonts/Tajawal-Medium.ttf);font-weight:500}
+@font-face{font-family:"Tajawal";src:url(static/fonts/Tajawal-Bold.ttf);font-weight:700}
+@font-face{font-family:"Noto Naskh Arabic";src:url(static/fonts/NotoNaskhArabic.ttf);font-weight:400 700}
 @font-face{font-family:"Sultan";src:url(static/fonts/Sultan-Normal.ttf);font-weight:400}
 @font-face{font-family:"Sultan";src:url(static/fonts/Sultan-Bold.ttf);font-weight:700}
-:root{--g:#14352a;--g2:#1f6b4f;--g3:#e6f1ea;--gold:#b98a2e;--gold2:#fbf3df;--bd:#e0e5e0;--ink:#1d2a24;--mut:#66756d;--bg:#edf0ed;--lh:1.6}
+:root{--lh:2;--g:#14352a;--g2:#1f6b4f;--g3:#e6f1ea;--gold:#b98a2e;--gold2:#fbf3df;--bd:#e0e5e0;--ink:#1d2a24;--mut:#66756d;--bg:#edf0ed}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;font-family:"Tajawal","Noto Naskh Arabic",sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;flex-direction:column;font-size:15px}
@@ -41,7 +46,7 @@ input[type=range]{accent-color:var(--g2)}
 .btn:disabled{opacity:.7;cursor:wait;transform:none}
 .btn.alt{background:#fff;color:var(--g);border:1px solid #b9c7bd;box-shadow:none;font-weight:500}
 .btn.alt:hover{background:var(--g3)}
-.btn.gold{background:linear-gradient(135deg,#d1a444,var(--gold));color:#2b1f06}
+.btn.wa{background:linear-gradient(135deg,#2bc16b,#128c4a);color:#fff}.btn.gold{background:linear-gradient(135deg,#d1a444,var(--gold));color:#2b1f06}
 #gen{padding:13px 16px;font-size:16.5px;letter-spacing:.2px}
 #mic{padding:13px 14px}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -53,7 +58,7 @@ input[type=range]{accent-color:var(--g2)}
 .stage{overflow:auto;padding:18px;text-align:center;background:radial-gradient(#cdd5cd 1.1px,transparent 1.2px) 0 0/20px 20px,#e3e8e3}
 .stat{position:sticky;top:0;display:inline-block;z-index:3;background:#fff;border-radius:999px;padding:5px 16px;font-size:13px;font-weight:500;margin-bottom:10px;box-shadow:0 2px 8px #14352a26}
 .stat.ok{color:#1d7a3a}.stat.bad{color:#b3261e}
-.wrap{transform-origin:top center;display:block;width:210mm;margin:0 auto}
+.wrap{--fs:15pt;--fs2:16.5pt;--fs3:17pt}.wrap.big{--fs:18.5pt;--fs2:19pt;--fs3:19.5pt}.wrap{transform-origin:top center;display:block;width:210mm;margin:0 auto}
 .a4{margin-bottom:14px;width:210mm;height:296.6mm;background:#fff;position:relative;box-shadow:0 3px 12px #0005;overflow:hidden;text-align:right}
 .ph{position:absolute;right:0;left:0;color:#c5c5c5;font:11px sans-serif;text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.8}
 .ph.h{top:0;height:46mm;background:repeating-linear-gradient(135deg,#fafafa 0 8px,#fff 8px 16px)}
@@ -62,12 +67,12 @@ input[type=range]{accent-color:var(--g2)}
 .pg *{font-family:"Sultan","Noto Naskh Arabic",serif}
 .pg b{font-weight:700}
 .body{outline:none;display:flow-root}
-.body p{font-size:18.5pt;line-height:var(--lh);margin:0 0 2mm;text-align:justify}
-.body .to{font-weight:700;font-size:19pt}
-.body .gr{font-size:19pt;margin:5mm 0 3mm}
+.body p{font-size:var(--fs);line-height:var(--lh);margin:0 0 2mm;text-align:justify}
+.body .to{font-weight:700;font-size:var(--fs2)}
+.body .gr{font-size:var(--fs2);margin:5mm 0 3mm}
 .body .cl{text-align:center;margin-top:4mm}
-.body .cx{text-align:center;font-weight:700;font-size:19pt;margin-top:5mm}
-.body li{font-size:18.5pt;line-height:var(--lh);margin:0 0 1mm}
+.body .cx{text-align:center;font-weight:700;font-size:var(--fs2);margin-top:5mm}
+.body li{font-size:var(--fs);line-height:var(--lh);margin:0 0 1mm}
 .body ul{margin:0 0 2mm;padding:0 7mm 0 0;list-style:"– "}
 .n{font-family:"Amiri","Noto Naskh Arabic",serif!important}
 .blank{background:#fff7d6;border-radius:3px}
@@ -77,7 +82,7 @@ input[type=range]{accent-color:var(--g2)}
 .cc .i{display:flex;align-items:center;gap:1mm;white-space:nowrap}
 .cc svg{flex:none}
 .cc .typ{display:flex;align-items:center;gap:1.2mm;margin-top:.5mm}
-.sig{width:90mm;text-align:center;font-weight:700;font-size:19.5pt;line-height:1.6;margin-bottom:19mm}
+.sig{width:90mm;text-align:center;font-weight:700;font-size:var(--fs3);line-height:1.6;margin-bottom:19mm}
 .arch{max-width:900px;margin:16px auto;background:#fff;border-radius:10px;padding:12px;width:calc(100% - 24px)}
 .it{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #eee}
 .it .t{flex:1}.it small{display:block;color:#777;font-size:12px}
@@ -133,8 +138,9 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  <div class="hint" id="anNote" style="display:none;background:#e7f5ec;color:#17392b">✓ تم التحليل (قانونياً ولغوياً ونحوياً وصياغةً) في الخلفية، والمراسلة هي النسخة الأفضل بعد التحليل.</div>
  <div class="sec"><h3><i>2</i>التحرير</h3>
   <div class="tb row" style="margin-top:0"><button id="bB"><b>B</b> عريض</button><button id="bL">• قائمة</button><button id="bC">وسط</button><button id="bU">تراجع</button><button id="bAI" style="border-color:#c0902f;font-weight:700">✎ عدّل جزء بالذكاء</button></div>
-  <label>تباعد الأسطر: <span id="lhv">1.6</span></label>
-  <input type="range" id="lh" min="1.3" max="2" step=".05" value="1.6" style="width:100%">
+  <label>حجم الخط</label><select id="fs"><option value="prev">الورقة السابقة (متن 15pt، تباعد 2)</option><option value="big">كبير (متن 18.5pt، تباعد 1.6)</option></select>
+  <label>تباعد الأسطر: <span id="lhv">2.00</span></label>
+  <input type="range" id="lh" min="1.3" max="2" step=".05" value="2" style="width:100%">
   <div class="row"><button class="btn alt" id="fit">ملاءمة تلقائية</button><button class="btn alt" id="clear">مسح الحقول المظللة</button></div>
   <div class="hint">اضغط على أي كلمة في الورقة وعدّل مباشرة. الحقول الصفراء فراغات للتعبئة باليد.</div>
  </div>
@@ -146,8 +152,9 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
   <label>المسمى</label><input type="text" id="st" value="رئيس قسم الإعلام">
  </div>
  <div class="sec"><h3><i>4</i>إخراج</h3>
-  <div class="row" style="margin-top:0"><button class="btn gold" id="pdf">تصدير PDF</button><button class="btn" id="save">حفظ في الأرشيف</button></div>
-  <div class="hint">يفتح نافذة الطباعة: اختر «حفظ بصيغة PDF»، الهوامش «بلا»، وألغِ «الرؤوس والتذييلات».</div>
+  <div class="row" style="margin-top:0"><button class="btn gold" id="pdf" style="flex:1">⬇ تنزيل PDF</button><button class="btn wa" id="wa" style="flex:1">➤ إرسال واتساب</button></div>
+  <div class="row"><button class="btn" id="save" style="flex:1">حفظ في الأرشيف</button><button class="btn alt" id="prt">🖨 طباعة</button></div>
+  <div class="hint">ينزل PDF جاهز (A4) مباشرة بدون نافذة طباعة. واتساب: في الجوال تفتح قائمة المشاركة وتختار واتساب، وفي الكمبيوتر ينزل الملف ويفتح واتساب لترفقه.</div>
  </div>
 </aside>
 <div class="stage"><div class="stat ok" id="stat"></div>
@@ -165,14 +172,16 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  <input type="text" id="popIn" placeholder="أو اكتب شن تبي تتغير…"><div class="row"><button class="btn" id="popGo">طبّق</button><button class="btn alt" id="popX">إلغاء</button></div></div>
 <div class="toast" id="toast"></div>
 
+<script src="static/vendor/html2canvas.min.js"></script>
+<script src="static/vendor/jspdf.umd.min.js"></script>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const TYPES=["تكليف","إفادة للمدير","طلب من المدير","مقترح"];
 const TOS=["موظف","مدير مكتب الأوقاف والشؤون الإسلامية القره بوللي"];
-const CC=["مدير مكتب الأوقاف القره بوللي","قسم الشؤون الإدارية","قسم المتابعة","قسم الإعلام","قسم الشؤون الثقافية والدعوية","الملف الدوري العام"];
+const CC=["مدير مكتب الأوقاف القره بوللي","قسم الشؤون الإدارية","قسم المتابعة","قسم الإعلام","قسم التقنية والمعلومات والتوثيق","قسم الشؤون الثقافية والدعوية","الملف الدوري العام"];
 const DOC='<svg viewBox="0 0 10 12" width="2.2mm" height="2.7mm"><path d="M1 .7h5.3l2.9 2.9v7.7H1z" fill="none" stroke="#000"/><path d="M6.3.7v2.9h2.9" fill="none" stroke="#000" stroke-width=".9"/><path d="M2.6 5.2h5M2.6 7h5M2.6 8.8h5" stroke="#000" stroke-width=".7"/></svg>';
 const KB='<svg viewBox="0 0 21 13" width="4.2mm" height="2.6mm"><rect width="21" height="13" rx="1.5" fill="#000"/>'+[2,4.6,7.2].map(y=>[1.6,3.95,6.3,8.65,11,13.35,15.7,18.05].map(x=>`<rect x="${x}" y="${y}" width="1.5" height="1.6" fill="#fff"/>`).join("")).join("")+'<rect x="5" y="9.8" width="11" height="1.6" fill="#fff"/></svg>';
-let type="تكليف",cc=["مدير مكتب الأوقاف القره بوللي","قسم الشؤون الإدارية","قسم المتابعة","قسم الإعلام","الملف الدوري العام"];
+let type="تكليف",cc=["قسم الشؤون الإدارية","قسم المتابعة","قسم الإعلام","قسم التقنية والمعلومات والتوثيق","الملف الدوري العام"];
 const toast=m=>{const t=$("#toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",1900)};
 const dg=h=>h.replace(/(<[^>]*>)|([0-9][0-9\/ ]*[0-9]|[0-9])/g,(m,a,b)=>a?a:`<span class="n">${b}</span>`);
 const bl=(v,n)=>v?v:`<span class="blank">${".".repeat(n)}</span>`;
@@ -296,14 +305,36 @@ function getBody(){return $$(".body").map(b=>b.innerHTML).join("")}
 function setLH(v){pagesEl.style.setProperty("--lh",v);$("#lh").value=v;$("#lhv").textContent=(+v).toFixed(2)}
 $("#lh").oninput=e=>{setLH(e.target.value);layoutAll()};
 $("#sigSel").onchange=e=>{sigChoice=e.target.value;layoutAll()};
-$("#fit").onclick=()=>{setLH(1.6);layoutAll();if(PN>1){for(let v=1.55;v>=1.4;v-=.05){setLH(v.toFixed(2));layoutAll();if(PN===1)break}
- if(PN>1){setLH(1.6);layoutAll();toast("النص أطول من صفحة، انتقل للصفحة الثانية")}}else toast("صفحة واحدة بتباعد 1.60")};
+const FSP={prev:{lh:2,min:1.5},big:{lh:1.6,min:1.4}};let FSK="prev";
+function setFS(k){FSK=k;$("#wrap").classList.toggle("big",k==="big");$("#fs").value=k;try{localStorage.setItem("awq_fs",k)}catch(e){}}
+$("#fs").onchange=e=>{setFS(e.target.value);$("#fit").click()};
+$("#fit").onclick=()=>{const P=FSP[FSK];setLH(P.lh);layoutAll();if(PN>1){for(let v=P.lh-.05;v>=P.min-.001;v-=.05){setLH(v.toFixed(2));layoutAll();if(PN===1)break}
+ if(PN>1){setLH(P.lh);layoutAll();toast("النص أطول من صفحة، انتقل للصفحة الثانية")}}else toast("صفحة واحدة بتباعد "+P.lh.toFixed(2))};
 $("#bB").onclick=()=>document.execCommand("bold");
 $("#bC").onclick=()=>document.execCommand("justifyCenter");
 $("#bU").onclick=()=>document.execCommand("undo");
 $("#bL").onclick=()=>document.execCommand("insertHTML",false,"<ul><li>بند</li></ul>");
 $("#clear").onclick=()=>{$$(".blank").forEach(b=>b.classList.remove("blank"));toast("أُزيل التظليل")};
-$("#pdf").onclick=()=>{toast("اختر «حفظ بصيغة PDF» وألغِ الرؤوس والتذييلات");setTimeout(()=>window.print(),600)};
+const dlBlob=(b,n)=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)};
+function pdfName(){const d=new Date(),t=((last&&last.type)||"مراسلة").replace(/[\\\/:*?"<>|]+/g,"").trim().replace(/\s+/g,"_");return t+"_"+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+".pdf"}
+async function makePDF(){await document.fonts.ready;
+ if(!window.html2canvas||!window.jspdf)throw new Error("مكتبة PDF ما تحملت");
+ const pages=$$(".a4"),pdf=new window.jspdf.jsPDF({unit:"mm",format:[210,296.6],orientation:"portrait",compress:true});
+ const wcls=$("#wrap").className,lhv=getComputedStyle(pagesEl).getPropertyValue("--lh");
+ for(let i=0;i<pages.length;i++){
+  const cv=await html2canvas(pages[i],{scale:3,backgroundColor:"#ffffff",useCORS:true,logging:false,scrollX:0,scrollY:0,
+   onclone:(d,el)=>{const h=d.createElement("div");h.className=wcls;h.style.cssText="transform:none;height:auto;width:210mm;margin:0;position:absolute;top:0;left:0;--lh:"+lhv;
+    d.body.innerHTML="";d.body.style.cssText="margin:0;display:block;height:auto;overflow:visible;background:#fff";d.body.appendChild(h);h.appendChild(el);
+    el.style.boxShadow="none";el.style.margin="0";
+    d.querySelectorAll(".ph,.pn").forEach(x=>x.style.visibility="hidden");d.querySelectorAll(".blank").forEach(x=>x.style.background="none")}});
+  if(i)pdf.addPage([210,296.6]);pdf.addImage(cv.toDataURL("image/jpeg",.94),"JPEG",0,0,210,296.6)}
+ return {blob:pdf.output("blob"),name:pdfName()}}
+async function withBusy(id,fn){const b=$(id),o=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin">⟳</span> يجهّز…';try{await fn()}catch(e){toast("تعذر: "+e.message)}b.disabled=false;b.innerHTML=o}
+$("#pdf").onclick=()=>withBusy("#pdf",async()=>{const r=await makePDF();dlBlob(r.blob,r.name);toast("تم تنزيل "+r.name)});
+$("#wa").onclick=()=>withBusy("#wa",async()=>{const r=await makePDF(),f=new File([r.blob],r.name,{type:"application/pdf"});
+ if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:r.name});return}catch(e){if(e&&e.name==="AbortError")return}}
+ dlBlob(r.blob,r.name);window.open("https://wa.me/?text="+encodeURIComponent("مرفق: "+r.name),"_blank");toast("نزل الملف، أرفقه في واتساب")});
+$("#prt").onclick=()=>{toast("اختر «حفظ بصيغة PDF» وألغِ الرؤوس والتذييلات");setTimeout(()=>window.print(),600)};
 $("#merge").onclick=()=>toast("الدمج: مرحلة قادمة");
 
 let store=[];try{store=JSON.parse(localStorage.getItem("awq2")||"[]")}catch(e){}
@@ -317,6 +348,7 @@ function view(n){$("#mainView").classList.toggle("hid",!n);$("#arcView").classLi
 $("#tNew").onclick=()=>view(1);$("#tArc").onclick=()=>view(0);
 window.onresize=()=>{scale()};
 drawBottom();list();$$("#ex .chip").forEach(c=>c.onclick=()=>{const t=$("#topic");t.value=c.dataset.t;t.focus();t.setSelectionRange(t.value.length,t.value.length)});
+try{const k=localStorage.getItem("awq_fs");if(k&&FSP[k])setFS(k)}catch(e){}
 document.fonts.ready.then(()=>{$("#fit").click()});
 </script>
 </body></html>
