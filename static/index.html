@@ -92,7 +92,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
 </style>
 </head>
 <body>
-<div class="top"><h1>منشئ مراسلات الأوقاف</h1><button class="on" id="tNew">مراسلة جديدة</button><button id="tArc">الأرشيف</button><button id="tKey" style="display:none">🔑 مفتاح Gemini</button></div>
+<div class="top"><h1>منشئ مراسلات الأوقاف</h1><button class="on" id="tNew">مراسلة جديدة</button><button id="tArc">الأرشيف</button><button id="tKey" style="display:none">🔑 مفتاح Gemini</button><span id="cnt" style="margin-inline-start:auto;font-size:12px;opacity:.85"></span></div>
 <div class="main" id="mainView">
 <aside class="side">
  <div class="sec"><h3><i>1</i>قول شن تبي</h3>
@@ -161,14 +161,20 @@ const EMBED_KEY="__GEMINI_KEY__";
 const getKey=()=>{let k="";try{k=localStorage.getItem(KEYN)||""}catch(e){}return k||(EMBED_KEY.startsWith("__")?"":EMBED_KEY)};
 function setKey(){const k=prompt("الصق مفتاح Gemini API (يتحفظ في هذا المتصفح فقط):",getKey());if(k===null)return false;try{localStorage.setItem(KEYN,k.trim())}catch(e){}return !!k.trim()}
 if(STATIC){const b=document.getElementById("tKey");b.style.display="";b.onclick=setKey}
+const dayK=()=>"awq_cnt_"+new Date().toISOString().slice(0,10);
+function cntShow(){let n=0;try{n=+localStorage.getItem(dayK())||0}catch(e){}const c=document.getElementById("cnt");if(c)c.textContent="طلبات اليوم: "+n}
+function cntAdd(){try{localStorage.setItem(dayK(),(+localStorage.getItem(dayK())||0)+1)}catch(e){}cntShow()}
+cntShow();
+function quotaMsg(txt){return /PerDay|per day|daily/i.test(txt)?"⛔ وصل مفتاح Gemini للحد اليومي المجاني. جرّب بكرة أو استعمل مفتاح آخر (🔑).":"⏳ المفتاح وصل حد الاستعمال في الدقيقة. استنى دقيقة وأعد المحاولة."}
 async function gem(file,user,temp){let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
- const sys=await (await fetch(file)).text();let err="";
+ const sys=await (await fetch(file)).text();let err="",q429="";
  for(const m of GMODELS){
   try{const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
    body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:{temperature:temp,responseMimeType:"application/json"}})});
-   if(!r.ok){err="Gemini "+r.status+": "+(await r.text()).slice(0,160);if(r.status==400||r.status==403)throw new Error(err);continue}
-   const j=await r.json();const t=j.candidates[0].content.parts.filter(x=>x.text).map(x=>x.text).join("").trim().replace(/^```(?:json)?|```$/g,"").trim();return JSON.parse(t)}
+   if(!r.ok){const tx=await r.text();err="Gemini "+r.status+": "+tx.slice(0,160);if(r.status==429){q429=q429.includes("PerDay")?q429:tx;continue}if(r.status==400||r.status==403)throw new Error(err);continue}
+   const j=await r.json();const t=j.candidates[0].content.parts.filter(x=>x.text).map(x=>x.text).join("").trim().replace(/^```(?:json)?|```$/g,"").trim();const out=JSON.parse(t);cntAdd();return out}
   catch(e){if(/^Gemini 40[03]/.test(e.message))throw e;err=e.message}}
+ if(q429)throw new Error(quotaMsg(q429));
  throw new Error(err||"تعذر الاتصال")}
 async function api(path,body){
  if(STATIC){if(path=="/api/compose")return gem("prompts/system_prompt.md",body.text,0.4);
