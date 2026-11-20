@@ -237,11 +237,12 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
 <div class="modal hid" id="keyModal"><div class="mbox">
  <h3 style="margin:0 0 8px;color:var(--g)">🔑 المفاتيح والموديل</h3>
  <label>المزوّد (اللي يكتب المراسلات)</label>
- <div class="seg"><button id="pvG" type="button">Gemini</button><button id="pvC" type="button">Claude</button></div>
+ <div class="seg"><button id="pvG" type="button">Gemini</button><button id="pvR" type="button">Groq</button><button id="pvC" type="button">Claude</button></div>
  <label>مفتاح Gemini API</label><input type="password" id="kG" autocomplete="off" placeholder="AIza… (فاضي = المفتاح الافتراضي للموقع)">
+ <label>مفتاح Groq API</label><input type="password" id="kR" autocomplete="off" placeholder="gsk_… (فاضي = المفتاح الافتراضي للموقع)">
  <label>مفتاح Claude API</label><input type="password" id="kC" autocomplete="off" placeholder="sk-ant-…">
  <label>الموديل</label><select id="mSel"></select>
- <div class="hint">المفاتيح تتحفظ في هذا المتصفح فقط. كتابة الصوت (تكلم) تحتاج مفتاح Gemini دايماً. Claude للمراسلات والجداول وتعديل الأجزاء.</div>
+ <div class="hint">المفاتيح تتحفظ في هذا المتصفح فقط. لو المزوّد اللي اخترته وقف (حد الاستعمال أو انشغال) يتحوّل تلقائياً للمزوّدين الثانيين اللي عندهم مفتاح. كتابة الصوت (تكلم) تستعمل Groq Whisper لو فيه مفتاح Groq، وإلا Gemini.</div>
  <div class="row"><button class="btn" id="kSave" style="flex:1" type="button">حفظ</button><button class="btn alt" id="kCancel" type="button">إغلاق</button><button class="btn alt" id="kClear" type="button">مسح مفاتيحي</button></div>
 </div></div>
 <div class="toast" id="toast"></div>
@@ -275,23 +276,47 @@ const KEYN="awq_gkey",GMODELS=["gemini-3-flash-preview","gemini-3.1-flash-lite",
 const EMBED_KEY="__GEMINI_KEY__";
 const getKey=()=>{let k="";try{k=localStorage.getItem(KEYN)||""}catch(e){}return k||(EMBED_KEY.startsWith("__")?"":EMBED_KEY)};
 const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
-const getProv=()=>lsGet("awq_prov")==="claude"?"claude":"gemini",getCKey=()=>lsGet("awq_ckey");
+const getProv=()=>{const p=lsGet("awq_prov");return p==="claude"||p==="groq"?p:"gemini"},getCKey=()=>lsGet("awq_ckey");
+const EMBED_GROQ="__GROQ_KEY__",getGrKey=()=>lsGet("awq_grkey")||(EMBED_GROQ.startsWith("__")?"":EMBED_GROQ);
 const GMODEL_OPTS=[["","تلقائي (الأسرع، مع بدائل)"],["gemini-3-flash-preview","gemini-3-flash-preview (سريع)"],["gemini-flash-latest","gemini-flash-latest (الأحدث)"],["gemini-3.1-flash-lite","gemini-3.1-flash-lite (خفيف)"],["gemini-3.5-flash","gemini-3.5-flash (أدق، أبطأ)"]];
 const CAUTO=["claude-sonnet-5-5","claude-haiku-5-5"];
+const GRAUTO=["openai/gpt-oss-120b","qwen/qwen3.8-27b","openai/gpt-oss-20b"];
+const GROQ_OPTS=[["","تلقائي (gpt-oss-120b ثم بدائل)"],["openai/gpt-oss-120b","gpt-oss-120b (الأقوى)"],["qwen/qwen3.8-27b","qwen3.8-27b"],["openai/gpt-oss-20b","gpt-oss-20b (الأسرع)"]];
 const CMODEL_OPTS=[["","تلقائي (Sonnet 5.5 ثم Haiku 5.5)"],["claude-sonnet-5-5","Claude Sonnet 5.5 (متوازن)"],["claude-haiku-5-5","Claude Haiku 5.5 (سريع)"],["claude-opus-5-5","Claude Opus 5.5 (الأقوى)"]];
-function provUI(p){$("#pvG").classList.toggle("on",p==="gemini");$("#pvC").classList.toggle("on",p==="claude");
- $("#mSel").innerHTML=(p==="claude"?CMODEL_OPTS:GMODEL_OPTS).map(([v,t])=>`<option value="${v}">${t}</option>`).join("");$("#mSel").value=lsGet(p==="claude"?"awq_cmodel":"awq_model");$("#keyModal").dataset.p=p}
-function openKeys(){$("#kG").value=lsGet("awq_gkey");$("#kC").value=getCKey();provUI(getProv());$("#keyModal").classList.remove("hid")}
+const MK={gemini:"awq_model",groq:"awq_grmodel",claude:"awq_cmodel"},MOPT={gemini:GMODEL_OPTS,groq:GROQ_OPTS,claude:CMODEL_OPTS},PNAME={gemini:"Gemini",groq:"Groq",claude:"Claude"},PBTN={gemini:"G",groq:"R",claude:"C"};
+function provUI(p){["G","R","C"].forEach(k=>$("#pv"+k).classList.remove("on"));$("#pv"+PBTN[p]).classList.add("on");
+ $("#mSel").innerHTML=MOPT[p].map(([v,t])=>`<option value="${v}">${t}</option>`).join("");$("#mSel").value=lsGet(MK[p]);$("#keyModal").dataset.p=p}
+function openKeys(){$("#kG").value=lsGet("awq_gkey");$("#kR").value=lsGet("awq_grkey");$("#kC").value=getCKey();provUI(getProv());$("#keyModal").classList.remove("hid")}
 function setKey(){openKeys();return false}
-function updProv(){const b=$("#tKey");if(b)b.textContent="🔑 "+(getProv()==="claude"?"Claude":"Gemini")}
-$("#pvG").onclick=()=>provUI("gemini");$("#pvC").onclick=()=>provUI("claude");
-$("#kSave").onclick=()=>{const p=$("#keyModal").dataset.p||"gemini";lsSet("awq_gkey",$("#kG").value.trim());lsSet("awq_ckey",$("#kC").value.trim());
- if(p==="claude"&&!$("#kC").value.trim())return toast("ضع مفتاح Claude أولاً");
- lsSet("awq_prov",p);lsSet(p==="claude"?"awq_cmodel":"awq_model",$("#mSel").value);$("#keyModal").classList.add("hid");updProv();toast("تم: "+(p==="claude"?"Claude":"Gemini"))};
+function updProv(){const b=$("#tKey");if(b)b.textContent="🔑 "+PNAME[getProv()]}
+$("#pvG").onclick=()=>provUI("gemini");$("#pvR").onclick=()=>provUI("groq");$("#pvC").onclick=()=>provUI("claude");
+$("#kSave").onclick=()=>{const p=$("#keyModal").dataset.p||"gemini";lsSet("awq_gkey",$("#kG").value.trim());lsSet("awq_grkey",$("#kR").value.trim());lsSet("awq_ckey",$("#kC").value.trim());
+ if(p==="claude"&&!getCKey())return toast("ضع مفتاح Claude أولاً");if(p==="groq"&&!getGrKey())return toast("ضع مفتاح Groq أولاً");
+ lsSet("awq_prov",p);lsSet(MK[p],$("#mSel").value);$("#keyModal").classList.add("hid");updProv();toast("تم: "+PNAME[p])};
 $("#kCancel").onclick=()=>$("#keyModal").classList.add("hid");
 $("#keyModal").addEventListener("click",e=>{if(e.target.id==="keyModal")$("#keyModal").classList.add("hid")});
-$("#kClear").onclick=()=>{["awq_gkey","awq_ckey"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});$("#kG").value="";$("#kC").value="";toast("مسحت المفاتيح المحفوظة")};
+$("#kClear").onclick=()=>{["awq_gkey","awq_grkey","awq_ckey"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});$("#kG").value="";$("#kR").value="";$("#kC").value="";toast("مسحت المفاتيح المحفوظة")};
 $("#mdlBtn").onclick=openKeys;updProv();
+async function groqGem(file,user,temp){const key=getGrKey();if(!key){openKeys();throw new Error("ضع مفتاح Groq أولاً")}
+ const sys=await (await fetch(file)).text(),sel=lsGet("awq_grmodel"),ms=sel?[sel,...GRAUTO.filter(m=>m!==sel)]:GRAUTO;let err="";
+ for(const m of ms){if(DEAD[m]>Date.now())continue;
+  try{const r=await fx("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
+   body:JSON.stringify({model:m,messages:[{role:"system",content:sys},{role:"user",content:user}],temperature:temp==null?0.4:temp,response_format:{type:"json_object"}})});
+   if(!r.ok){const tx=await r.text();err=r.status==429?"⏳ Groq وصل حد الاستعمال، استنى شوية":"Groq "+r.status+": "+tx.slice(0,160);
+    if(r.status==429&&/per day|TPD|RPD/i.test(tx))DEAD[m]=Date.now()+30*60000;
+    if(r.status==401)throw new Error("مفتاح Groq غير صحيح");if(r.status==403)throw new Error(err);continue}
+   const j=await r.json(),t=((j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||"").trim(),mm=t.match(/\{[\s\S]*\}/);if(!mm)throw new Error("رد غير صالح من Groq");
+   const out=JSON.parse(mm[0]);cntAdd();return out}
+  catch(e){if(/^مفتاح Groq|^Groq 403/.test(e.message))throw e;err=e.message}}
+ throw new Error(/abort/i.test(err)?"انتهت المهلة، أعد المحاولة":(err||"تعذر الاتصال بـ Groq"))}
+async function groqWhisper(blob,type){const key=getGrKey(),ext=/mp4|m4a|aac/.test(type)?"m4a":/ogg/.test(type)?"ogg":"webm";let err="";
+ for(const m of ["whisper-large-v3","whisper-large-v3-turbo"]){
+  const fd=new FormData();fd.append("file",blob,"rec."+ext);fd.append("model",m);fd.append("language","ar");fd.append("response_format","json");fd.append("temperature","0");
+  try{const r=await fx("https://api.groq.com/openai/v1/audio/transcriptions",{method:"POST",headers:{"Authorization":"Bearer "+key},body:fd},60000);
+   if(!r.ok){err=r.status==429?"⏳ Groq وصل حد الاستعمال":"Groq "+r.status+": "+(await r.text()).slice(0,120);if(r.status==401)throw new Error("مفتاح Groq غير صحيح");continue}
+   const j=await r.json();cntAdd();return(j.text||"").trim()}
+  catch(e){if(/غير صحيح/.test(e.message))throw e;err=e.message}}
+ throw new Error(err||"تعذر التفريغ")}
 async function claudeGem(file,user){const key=getCKey();if(!key){openKeys();throw new Error("ضع مفتاح Claude أولاً")}
  const sys=await (await fetch(file)).text(),sel=lsGet("awq_cmodel"),ms=sel?[sel,...CAUTO.filter(m=>m!==sel)]:CAUTO;let err="";
  for(const m of ms){
@@ -322,7 +347,12 @@ async function gemRaw(parts,temp){let key=getKey();if(!key){if(!setKey())throw n
    const j=await r.json(),out=j.candidates[0].content.parts.filter(x=>x.text).map(x=>x.text).join("").trim();cntAdd();return out}
   catch(e){if(/^Gemini 40[03]/.test(e.message))throw e;err=e.message}}
  if(q429)throw new Error(quotaMsg(q429));throw new Error(/abort/i.test(err)?"انتهت المهلة، أعد المحاولة بعد لحظات":(err||"تعذر الاتصال"))}
-async function gem(file,user,temp){if(getProv()==="claude")return claudeGem(file,user);let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
+const hasK={gemini:()=>!!getKey(),groq:()=>!!getGrKey(),claude:()=>!!getCKey()};
+const callProv=(p,file,user,temp)=>p==="claude"?claudeGem(file,user):p==="groq"?groqGem(file,user,temp):gemGemini(file,user,temp);
+async function gem(file,user,temp){const p=getProv(),others=["gemini","groq","claude"].filter(x=>x!==p&&hasK[x]()),order=hasK[p]()?[p,...others]:(others.length?others:[p]);let first=null;
+ for(let k=0;k<order.length;k++){try{return await callProv(order[k],file,user,temp)}catch(e){if(!first)first=e;if(k<order.length-1)toast("تحوّل تلقائي من "+PNAME[order[k]]+" إلى "+PNAME[order[k+1]])}}
+ throw first}
+async function gemGemini(file,user,temp){let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
  const sys=await (await fetch(file)).text();let err="",q429="";
  for(const m of modelList()){if(DEAD[m]>Date.now()){q429=q429||"PerDay";continue}
   try{const r=await fx("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
@@ -390,6 +420,7 @@ async function transcribe(blob,type){
  const b64=await new Promise((res,rej)=>{const f=new FileReader();f.onload=()=>res(String(f.result).split(",")[1]);f.onerror=rej;f.readAsDataURL(blob)});
  if(!STATIC){const r=await fetch("/api/transcribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({audio:b64,mime:type})});
   if(r.status==401){location.href="/login";throw new Error("login")}const j=await r.json();if(!r.ok)throw new Error(j.error||"خطأ");return(j.text||"").trim()}
+ if(getGrKey()){try{return await groqWhisper(blob,type)}catch(e){if(!getKey())throw e}}
  return gemRaw([{text:TXPROMPT},{inlineData:{mimeType:type,data:b64}}],0)}
 async function micRec(){
  try{MST=await navigator.mediaDevices.getUserMedia({audio:true})}
@@ -404,7 +435,7 @@ async function micRec(){
   b.disabled=false;setMic(false)};
  rec.start();setMic(true);toast("تكلم الحين… واضغط «إيقاف» لما تخلص");
  mtimer=setTimeout(()=>{if(MR&&MR.state==="recording")MR.stop()},120000)}
-$("#mic").onclick=()=>{if(MR&&MR.state==="recording")return MR.stop();if(RECON)return micStop();if(canRec()&&(getKey()||!STATIC))return micRec();micSR()};
+$("#mic").onclick=()=>{if(MR&&MR.state==="recording")return MR.stop();if(RECON)return micStop();if(canRec()&&(getKey()||getGrKey()||!STATIC))return micRec();micSR()};
 $("#tReload").onclick=()=>{try{const u=new URL(location.href);u.searchParams.set("_r",Date.now());location.replace(u.toString())}catch(e){location.reload()}};
 try{if(/[?&]_r=/.test(location.search)){const u=new URL(location.href);u.searchParams.delete("_r");history.replaceState(null,"",u.pathname+(u.search||"")+u.hash)}}catch(e){}
 let CCH="",N1="",N2="";
