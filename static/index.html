@@ -156,7 +156,7 @@ function blocksToHtml(bl){return dg(bl.map(b=>{const h=FRAG(b.html||"");
  if(b.role=="farewell")return `<p class="cx">${h}</p>`;return `<p>${h}</p>`}).join(""))}
 let last=null;
 const STATIC=/github\.io$/.test(location.hostname)||location.search.includes("static");
-const KEYN="awq_gkey",GMODEL="gemini-2.5-flash";
+const KEYN="awq_gkey",GMODEL="gemini-flash-latest";
 const getKey=()=>{try{return localStorage.getItem(KEYN)||""}catch(e){return""}};
 function setKey(){const k=prompt("الصق مفتاح Gemini API (يتحفظ في هذا المتصفح فقط):",getKey());if(k===null)return false;try{localStorage.setItem(KEYN,k.trim())}catch(e){}return !!k.trim()}
 if(STATIC){const b=document.getElementById("tKey");b.style.display="";b.onclick=setKey}
