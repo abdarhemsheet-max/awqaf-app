@@ -25,6 +25,7 @@ jobs:
           mkdir site
           cp static/index.html site/index.html
           cp -r static/fonts site/static-fonts-tmp && mkdir -p site/static && mv site/static-fonts-tmp site/static/fonts
+          cp -r static/vendor site/static/vendor
           cp -r prompts site/prompts
           sed -i "s|__GEMINI_KEY__|${GEMINI_KEY}|" site/index.html
       - uses: actions/configure-pages@v5
