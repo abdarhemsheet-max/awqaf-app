@@ -59,6 +59,15 @@ details.sec .sub{margin:14px 0 6px;font-size:14px;color:var(--g);border-bottom:1
 .mbox{background:#fff;border-radius:18px;padding:18px;width:100%;max-width:430px;max-height:92vh;overflow:auto;box-shadow:0 20px 60px #0006}
 .seg{display:flex;gap:6px}.seg button{flex:1;padding:9px;border:1px solid #cdd5ce;background:#fff;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}
 .seg button.on{background:var(--g);color:#fff;border-color:var(--g)}
+.tplbar{position:sticky;top:0;z-index:6;background:#fff;border:2px solid var(--gold);border-radius:16px;padding:12px;margin:0 auto 12px;max-width:760px;text-align:right;box-shadow:0 8px 28px #14352a33}
+.tplbar h4{margin:0 0 6px;color:var(--g);font-size:15px}
+.tplbar .r{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.tplbar input{flex:1;min-width:140px}
+.vchip{display:inline-flex;gap:6px;align-items:center;background:#dbeafe;color:#1e3a8a;border-radius:999px;padding:3px 6px 3px 12px;font-size:13px;cursor:pointer}
+.vchip b{background:#1e3a8a22;border-radius:50%;width:18px;height:18px;display:grid;place-items:center;font-size:12px}
+.tplmode .body .var{background:#dbeafe;border-bottom:2px dashed #2563eb;border-radius:3px}
+.tplcard{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px;border:1px solid var(--bd);border-radius:14px;margin-bottom:10px;background:#fcfdfc}
+.tplcard .t{flex:1;min-width:180px;font-weight:700}.tplcard small{display:block;font-weight:400;color:var(--mut);font-size:12.5px;margin-top:2px;line-height:1.6}
 #tReload{font-weight:700!important}.btn.rec{background:linear-gradient(135deg,#d93025,#a50e0e)!important;color:#fff!important;animation:pulse 1.2s infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px #d9302533}}.btn.wa{background:linear-gradient(135deg,#2bc16b,#128c4a);color:#fff}.btn.gold{background:linear-gradient(135deg,#d1a444,var(--gold));color:#2b1f06}
 #gen{padding:13px 16px;font-size:16.5px;letter-spacing:.2px}
 #mic{padding:13px 14px}
@@ -140,7 +149,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
 </style>
 </head>
 <body>
-<div class="top"><h1><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#b98a2e"/><path d="M10 8h10l5 5v13H10z" fill="#fff"/><path d="M20 8v5h5" fill="#e9d6a3"/><path d="M13 17h9M13 20.5h9M13 24h6" stroke="#14352a" stroke-width="1.6" stroke-linecap="round"/></svg>منشئ مراسلات الأوقاف<small>مكتب أوقاف القره بوللي</small></h1><button class="on" id="tNew">مراسلة جديدة</button><button id="tArc">الأرشيف</button><button id="tKey" style="display:none">🔑 مفتاح Gemini</button><button id="tReload" title="تحديث الصفحة" aria-label="تحديث الصفحة">↻ تحديث</button><span id="cnt" style="margin-inline-start:auto;font-size:12px;opacity:.85"></span></div>
+<div class="top"><h1><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#b98a2e"/><path d="M10 8h10l5 5v13H10z" fill="#fff"/><path d="M20 8v5h5" fill="#e9d6a3"/><path d="M13 17h9M13 20.5h9M13 24h6" stroke="#14352a" stroke-width="1.6" stroke-linecap="round"/></svg>منشئ مراسلات الأوقاف<small>مكتب أوقاف القره بوللي</small></h1><button class="on" id="tNew">مراسلة جديدة</button><button id="tTpl">مراسلات معتادة</button><button id="tArc">الأرشيف</button><button id="tKey" style="display:none">🔑 مفتاح Gemini</button><button id="tReload" title="تحديث الصفحة" aria-label="تحديث الصفحة">↻ تحديث</button><span id="cnt" style="margin-inline-start:auto;font-size:12px;opacity:.85"></span></div>
 <div class="main" id="mainView">
 <aside class="side">
  <div class="sec"><h3><i>1</i>قول شن تبي</h3>
@@ -186,11 +195,20 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  </div>
  <div class="sec"><h3><i>4</i>إخراج</h3>
   <div class="row" style="margin-top:0"><button class="btn gold" id="pdf" style="flex:1">⬇ تنزيل PDF</button><button class="btn wa" id="wa" style="flex:1">➤ إرسال واتساب</button></div>
-  <div class="row"><button class="btn" id="save" style="flex:1">حفظ في الأرشيف</button><button class="btn alt" id="prt">🖨 طباعة</button></div>
+  <div class="row"><button class="btn" id="save" style="flex:1">حفظ في الأرشيف</button><button class="btn alt" id="prt">🖨 طباعة</button><button class="btn alt" id="tplMk" style="flex:1">📌 احفظ كقالب</button></div>
   <div class="hint">ينزل PDF جاهز (A4) مباشرة بدون نافذة طباعة. واتساب: في الجوال تفتح قائمة المشاركة وتختار واتساب، وفي الكمبيوتر ينزل الملف ويفتح واتساب لترفقه.</div>
  </div>
 </aside>
-<div class="stage"><div class="stat ok" id="stat"></div>
+<div class="stage"><div class="tplbar hid" id="tplBar">
+ <h4>📌 وضع القالب: حدد المتغيرات</h4>
+ <div style="font-size:13px;color:var(--mut);line-height:1.7">1) حدد بإصبعك أو الفأرة الكلمات اللي تتغير (اسم، تاريخ، درس…) داخل الورقة. 2) اكتب اسم المتغير واضغط «اجعله متغيراً». أو خلّي الذكاء يقترحها.</div>
+ <div class="r"><input type="text" id="tplName" placeholder="اسم القالب (مثال: تكليف تسجيل درس)"></div>
+ <div class="r"><input type="text" id="varName" list="varSug" placeholder="اسم المتغير (مثال: اسم الموظف)"><button class="btn" id="varMark" type="button">◉ اجعله متغيراً</button><button class="btn alt" id="varAI" type="button">✦ اقترح بالذكاء</button></div>
+ <datalist id="varSug"><option value="اسم الموظف"><option value="اسم الشيخ"><option value="عنوان الدرس"><option value="اليوم"><option value="التاريخ"><option value="الوقت"><option value="المكان"><option value="الجهة"><option value="المبلغ"><option value="الموضوع"></datalist>
+ <div class="r" id="varChips" style="margin-top:8px"></div>
+ <div class="r"><button class="btn gold" id="tplSave" type="button" style="flex:1">✓ احفظ القالب</button><button class="btn alt" id="tplCancel" type="button">✕ إلغاء</button></div>
+</div>
+<div class="stat ok" id="stat"></div>
 <div class="wrap" id="wrap"><div id="pages"></div></div></div>
 </div>
 
@@ -199,6 +217,18 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  <div id="list"></div>
  <div class="row"><button class="btn alt" id="merge">دمج المحدد في PDF واحد</button></div>
  <div class="hint">الأرشيف محفوظ في هذا المتصفح. الدمج في مرحلة قادمة.</div>
+</div></div>
+<div class="hid" id="tplView"><div class="arch">
+ <h3 style="margin:0 0 6px;color:var(--g)">📋 مراسلات معتادة (قوالب)</h3>
+ <div class="hint" style="margin-top:0">القالب مراسلة جاهزة ثابتة، وتتغير فيها أماكن معينة (الاسم، التاريخ، الدرس…). تختار القالب، تعبّي المتغيرات، وتطلع لك المراسلة فوراً بنفس الشكل. لإضافة قالب: اكتب مراسلة في «مراسلة جديدة» ثم اضغط «📌 احفظ كقالب» وحدد المتغيرات.</div>
+ <div id="tplList" style="margin-top:12px"></div>
+ <div class="row"><button class="btn alt" id="tplExp" type="button">⬇ نسخة احتياطية (تصدير)</button><button class="btn alt" id="tplImp" type="button">⬆ استيراد قوالب</button><input type="file" id="tplFile" accept=".json,application/json" class="hid"></div>
+</div></div>
+<div class="modal hid" id="tplUse"><div class="mbox">
+ <h3 id="tuTitle" style="margin:0 0 4px;color:var(--g)"></h3>
+ <div style="font-size:13px;color:var(--mut)">عبّي المتغيرات وتطلع المراسلة جاهزة:</div>
+ <div id="tuFields"></div>
+ <div class="row"><button class="btn" id="tuGo" style="flex:1" type="button">✦ أنشئ المراسلة</button><button class="btn alt" id="tuX" type="button">إلغاء</button></div>
 </div></div>
 <div class="pop" id="pop"><div style="font-size:12px;color:#555">الجزء المحدد: <b id="popSel"></b></div>
  <div class="chips" id="popChips"><span class="chip">اختصر</span><span class="chip">أقوى</span><span class="chip">أبسط</span><span class="chip">أرسمي أكثر</span></div>
@@ -300,6 +330,7 @@ async function gem(file,user,temp){if(getProv()==="claude")return claudeGem(file
  throw new Error(err||"تعذر الاتصال")}
 async function api(path,body){
  if(STATIC){if(path=="/api/compose")return gem("prompts/system_prompt.md",body.text,0.4);
+  if(path=="/api/tplvars")return gem("prompts/tplvars_prompt.md",body.text,0.2);
   if(path=="/api/table")return gem("prompts/table_prompt.md",["السياق (المراسلة):",body.context,"","المطلوب: "+body.request].join(String.fromCharCode(10)),0.3);
   return gem("prompts/edit_prompt.md",["السياق (المراسلة كاملة):",body.context,"","الجزء المطلوب تعديله:",body.selection,"","الطلب: "+body.request].join(String.fromCharCode(10)),0.5)}
  const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -471,8 +502,11 @@ function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||x
  $$("[data-o]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.o);setBody(x.h);cc=x.cc;$$("#cks input").forEach(i=>i.checked=cc.includes(i.value));drawBottom();view(1)});
  $$("[data-x]").forEach(b=>b.onclick=()=>{store=store.filter(y=>y.id!=b.dataset.x);persist();list()})}
 $("#q").oninput=list;
-function view(n){$("#mainView").classList.toggle("hid",!n);$("#arcView").classList.toggle("hid",!!n);$("#tNew").classList.toggle("on",!!n);$("#tArc").classList.toggle("on",!n);if(n)setTimeout(()=>{scale();fitCheck()},30)}
-$("#tNew").onclick=()=>view(1);$("#tArc").onclick=()=>view(0);
+function view(n){const m=n===2?"tpl":(n?"new":"arc");
+ $("#mainView").classList.toggle("hid",m!=="new");$("#arcView").classList.toggle("hid",m!=="arc");$("#tplView").classList.toggle("hid",m!=="tpl");
+ $("#tNew").classList.toggle("on",m==="new");$("#tArc").classList.toggle("on",m==="arc");$("#tTpl").classList.toggle("on",m==="tpl");
+ if(m==="new")setTimeout(()=>{scale();fitCheck()},30);if(m==="tpl")tplRender()}
+$("#tNew").onclick=()=>view(1);$("#tArc").onclick=()=>view(0);$("#tTpl").onclick=()=>view(2);
 window.onresize=()=>{scale()};
 drawBottom();list();$$("#ex .chip").forEach(c=>c.onclick=()=>{const t=$("#topic");t.value=c.dataset.t;t.focus();t.setSelectionRange(t.value.length,t.value.length)});
 const esc=t=>String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -523,6 +557,74 @@ function bumpSize(d){const r=selR;if(!r||r.collapsed)return toast("حدد الن
  document.execCommand("insertHTML",false,`<span style="font-size:${np}pt">${dv.innerHTML}</span>`);setTimeout(()=>{fitCheck()},0);toast("حجم الخط المحدد: "+np+"pt")}
 $("#aPlus").onclick=()=>bumpSize(1);$("#aMinus").onclick=()=>bumpSize(-1);
 
+const WD=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+const V=(n,d)=>`<span class="var" data-v="${n}">${d}</span>`;
+function tplVars(html){const d=document.createElement("div");d.innerHTML=html;const o=[],seen={};d.querySelectorAll(".var").forEach(sp=>{const n=sp.dataset.v;if(n&&!seen[n]){seen[n]=1;o.push({name:n,def:sp.textContent})}});return o}
+function tplLoad(){let L=[];try{L=JSON.parse(localStorage.getItem("awq_tpl")||"[]")}catch(e){}
+ try{if(!localStorage.getItem("awq_tpl_seed")){const cc0=["قسم الشؤون الإدارية","قسم المتابعة","قسم الإعلام","قسم التقنية والمعلومات والتوثيق","الملف الدوري العام"];
+  const task=`نكلفك بتسجيل درس ${V("اسم الشيخ","الشيخ عبدالواحد الشاوش")} بعنوان (${V("عنوان الدرس","ليدبروا آياته")})، وذلك يوم ${V("اليوم","الثلاثاء")} الموافق ${V("التاريخ","2026/11/17")}م ${V("الوقت","بعد صلاة العصر")} ${V("المكان","بمركز تحفيظ الصفا")}.`;
+  const a=blocksToHtml([{role:"to",html:`السيـد / ${V("اسم الموظف","أحمد فرج خليفة")}`},{role:"greeting",html:"السلام عليكم ورحمة الله وبركاته"},{role:"body",html:task},{role:"body",html:"علماً بأن إنجاز هذه المهمة سيكون <b>خارج أوقات الدوام الرسمي</b>."},{role:"closing",html:"نأمل المباشرة في التنفيذ."},{role:"farewell",html:"والسلام عليكم ورحمة الله وبركاته"}]);
+  const b=blocksToHtml([{role:"to",html:"السيـد / مدير مكتب الأوقاف والشؤون الإسلامية القره بوللي"},{role:"greeting",html:"السلام عليكم ورحمة الله وبركاته"},{role:"body",html:`<b>ففي الوقت</b> الذي نثمّن فيه جهودكم المبذولة في خدمة الصالح العام، فإننا نفيدكم علماً بأنه قد تم تكليف السيد / ${V("اسم الموظف","أحمد فرج خليفة")} بتسجيل درس ${V("اسم الشيخ","الشيخ عبدالواحد الشاوش")} بعنوان (${V("عنوان الدرس","ليدبروا آياته")})، وذلك يوم ${V("اليوم","الثلاثاء")} الموافق ${V("التاريخ","2026/11/17")}م ${V("الوقت","بعد صلاة العصر")} ${V("المكان","بمركز تحفيظ الصفا")}.`},{role:"body",html:"علماً بأن إنجاز المهمة سيكون <b>خارج أوقات الدوام الرسمي</b>."},{role:"closing",html:"نأمل التكرم بمكافأة مناسبة."},{role:"farewell",html:"والسلام عليكم ورحمة الله وبركاته"}]);
+  L=[{id:1,name:"تكليف تسجيل درس (نموذج)",type:"تكليف",html:a,cc:cc0,vars:tplVars(a)},{id:2,name:"إفادة المدير بتكليف تسجيل درس (نموذج)",type:"إفادة للمدير",html:b,cc:cc0,vars:tplVars(b)}];
+  localStorage.setItem("awq_tpl",JSON.stringify(L));localStorage.setItem("awq_tpl_seed","1")}}catch(e){}
+ return L}
+function tplPersist(L){try{localStorage.setItem("awq_tpl",JSON.stringify(L))}catch(e){toast("تعذر الحفظ في المتصفح")}}
+function tplRender(){const L=tplLoad();
+ $("#tplList").innerHTML=L.length?L.map(t=>`<div class="tplcard"><div class="t">${esc(t.name)}<small>المتغيرات: ${t.vars.map(v=>esc(v.name)).join("، ")}</small></div><button class="btn" data-use="${t.id}" type="button">▶ استعمل</button><button class="btn alt" data-edit="${t.id}" type="button">✎ تعديل</button><button class="btn alt" data-del="${t.id}" type="button">حذف</button></div>`).join(""):"<div class='hint'>ما عندكش قوالب بعد. اكتب مراسلة في «مراسلة جديدة» ثم اضغط «📌 احفظ كقالب».</div>";
+ $$("[data-use]").forEach(b=>b.onclick=()=>tplUse(+b.dataset.use));
+ $$("[data-edit]").forEach(b=>b.onclick=()=>{const t=tplLoad().find(x=>x.id==b.dataset.edit);if(t)tplStart(t)});
+ $$("[data-del]").forEach(b=>b.onclick=()=>{const t=tplLoad().find(x=>x.id==b.dataset.del);if(t&&confirm("حذف القالب «"+t.name+"»؟")){tplPersist(tplLoad().filter(x=>x.id!=t.id));tplRender()}})}
+let TUSE=null;
+function tplUse(id){const t=tplLoad().find(x=>x.id===id);if(!t)return;TUSE=t;$("#tuTitle").textContent=t.name;
+ $("#tuFields").innerHTML=t.vars.map((v,i)=>{const isD=/تاريخ/.test(v.name)||/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(v.def.trim());
+  const dv=isD&&/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.test(v.def.trim())?v.def.trim().replace(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/,(m,y,mo,d)=>y+"-"+mo.padStart(2,"0")+"-"+d.padStart(2,"0")):"";
+  const f=isD?`<input type="date" data-i="${i}" data-d="1" value="${dv}">`:(v.def.length>45?`<textarea data-i="${i}" style="min-height:60px">${esc(v.def)}</textarea>`:`<input type="text" data-i="${i}" value="${esc(v.def).replace(/"/g,"&quot;")}">`);
+  return `<label>${esc(v.name)}</label>${f}`}).join("");
+ const di=$("#tuFields [data-d]");if(di)di.onchange=()=>{const dn=t.vars.findIndex(v=>v.name==="اليوم");if(dn<0||!di.value)return;const p=di.value.split("-").map(Number);const e=$("#tuFields [data-i='"+dn+"']");if(e)e.value=WD[new Date(p[0],p[1]-1,p[2]).getDay()]};
+ $$("#tuFields input[type=text],#tuFields textarea").forEach(e=>e.onfocus=()=>{try{e.select()}catch(x){}});
+ $("#tplUse").classList.remove("hid");const f0=$("#tuFields [data-i]");if(f0)setTimeout(()=>f0.focus(),50)}
+$("#tuX").onclick=()=>$("#tplUse").classList.add("hid");
+$("#tplUse").addEventListener("click",e=>{if(e.target.id==="tplUse")$("#tplUse").classList.add("hid")});
+$("#tuGo").onclick=()=>{const t=TUSE;if(!t)return;const val={};
+ $$("#tuFields [data-i]").forEach(e=>{const v=t.vars[+e.dataset.i];let x=e.value.trim();if(e.dataset.d&&x)x=x.replace(/-/g,"/");val[v.name]=x});
+ const d=document.createElement("div");d.innerHTML=t.html;
+ d.querySelectorAll(".var").forEach(sp=>{const x=val[sp.dataset.v];const tm=document.createElement("template");tm.innerHTML=x?dg(esc(x)):'<span class="blank">..............</span>';sp.replaceWith(tm.content)});
+ $("#tplUse").classList.add("hid");view(1);last={type:t.type||t.name};setBody(d.innerHTML);
+ cc=[...(t.cc||[])];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();$("#fit").click();toast("جاهزة: "+t.name);
+ if(innerWidth<=820)setTimeout(()=>$(".stage").scrollIntoView({behavior:"smooth"}),300)};
+let TPLID=null;
+function uniqueVars(){const o=[];$$(".body .var").forEach(sp=>{if(!o.includes(sp.dataset.v))o.push(sp.dataset.v)});return o}
+function unwrapVars(){$$(".body .var").forEach(sp=>sp.replaceWith(...sp.childNodes))}
+function varChips(){const names=uniqueVars();$("#varChips").innerHTML=names.length?names.map(n=>`<span class="vchip" data-n="${esc(n)}">${esc(n)} <b data-x="${esc(n)}">×</b></span>`).join(""):'<span style="font-size:12.5px;color:var(--mut)">ما حددتش متغيرات بعد</span>';
+ $$("#varChips .vchip").forEach(c=>c.onclick=e=>{if(e.target.dataset.x){const n=e.target.dataset.x;$$(".body .var").filter(sp=>sp.dataset.v===n).forEach(sp=>sp.replaceWith(...sp.childNodes));varChips();fitCheck()}else{$("#varName").value=c.dataset.n;toast("حدد مكان آخر لنفس المتغير ثم اضغط «اجعله متغيراً»")}})}
+function tplStart(t){view(1);if(t){setBody(t.html);cc=[...(t.cc||[])];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();last={type:t.type||t.name}}
+ else if(!getBody().replace(/<[^>]*>/g,"").trim())return toast("اكتب مراسلة أولاً ثم احفظها كقالب");
+ TPLID=t?t.id:null;$("#tplName").value=t?t.name:((last&&last.type)||"");$("#wrap").classList.add("tplmode");$("#tplBar").classList.remove("hid");varChips();
+ setTimeout(()=>{$("#tplBar").scrollIntoView({behavior:"smooth",block:"start"})},200)}
+function tplEnd(){unwrapVars();$("#wrap").classList.remove("tplmode");$("#tplBar").classList.add("hid");TPLID=null;layoutAll()}
+$("#tplMk").onclick=()=>tplStart(null);
+$("#tplCancel").onclick=()=>{tplEnd();toast("أُلغي وضع القالب")};
+$("#varMark").onclick=()=>{const r=selR;if(!r||r.collapsed)return toast("حدد الكلمات المتغيرة في الورقة أولاً");
+ const bk=n=>{const e=n.nodeType===1?n:n.parentElement;return e&&e.closest?e.closest(".body > *"):null};
+ const b1=bk(r.startContainer),b2=bk(r.endContainer);if(!b1||b1!==b2)return toast("حدد داخل فقرة واحدة");
+ const se=r.startContainer.nodeType===1?r.startContainer:r.startContainer.parentElement;if(se.closest(".var"))return toast("هذا الجزء متغير أصلاً");
+ const nm=$("#varName").value.trim()||("متغير "+(uniqueVars().length+1)),sp=document.createElement("span");sp.className="var";sp.dataset.v=nm;
+ try{sp.appendChild(r.extractContents());r.insertNode(sp)}catch(e){return toast("تعذر تحديد هذا الجزء")}
+ getSelection().removeAllRanges();selR=null;lastBlk=null;$("#varName").value="";varChips();fitCheck()};
+function wrapText(txt,name){let n=0;const w=document.createTreeWalker($("#pages"),NodeFilter.SHOW_TEXT,{acceptNode:x=>x.parentElement&&x.parentElement.closest(".body")&&!x.parentElement.closest(".var")?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT});
+ const nodes=[];let x;while(x=w.nextNode())nodes.push(x);
+ for(const t of nodes){const i=t.data.indexOf(txt);if(i<0)continue;const mid=t.splitText(i);mid.splitText(txt.length);const sp=document.createElement("span");sp.className="var";sp.dataset.v=name;mid.replaceWith(sp);sp.appendChild(mid);n++}
+ return n}
+$("#varAI").onclick=()=>withBusy("#varAI",async()=>{const text=$$(".body").map(b=>b.innerText).join(String.fromCharCode(10));
+ const j=await api("/api/tplvars",{text});const L=(j&&j.variables)||[];let ok=0,miss=0;
+ L.forEach(v=>{if(!v||!v.name||!v.text)return;wrapText(String(v.text),String(v.name))?ok++:miss++});varChips();layoutAll();
+ toast(ok?"اقترح "+ok+" متغير"+(miss?"، وتعذر "+miss:""):"ما قدرت أحدد متغيرات، حددها بيدك")});
+$("#tplSave").onclick=()=>{const name=$("#tplName").value.trim();if(!name)return toast("اكتب اسم القالب");if(!uniqueVars().length)return toast("حدد متغيراً واحداً على الأقل");
+ const html=getBody(),L=tplLoad(),o={id:TPLID||Date.now(),name,type:(last&&last.type)||name,html,cc:[...cc],vars:tplVars(html)};
+ const k=L.findIndex(x=>x.id===o.id);if(k>=0)L[k]=o;else L.unshift(o);tplPersist(L);tplEnd();view(2);toast("تم حفظ القالب")};
+$("#tplExp").onclick=()=>dlBlob(new Blob([JSON.stringify(tplLoad(),null,1)],{type:"application/json"}),"قوالب-المراسلات.json");
+$("#tplImp").onclick=()=>$("#tplFile").click();
+$("#tplFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const A=JSON.parse(rd.result);if(!Array.isArray(A))throw 0;const L=tplLoad();A.forEach(t=>{if(t&&t.html&&t.name){t.vars=tplVars(t.html);const k=L.findIndex(x=>x.id===t.id);if(k>=0)L[k]=t;else L.push(Object.assign({id:Date.now()+Math.floor(Math.random()*1000)},t))}});tplPersist(L);tplRender();toast("تم الاستيراد")}catch(x){toast("الملف غير صالح")}};rd.readAsText(f);e.target.value=""};
 try{const k=localStorage.getItem("awq_fs");if(k&&FSP[k])setFS(k)}catch(e){}
 try{const a=JSON.parse(localStorage.getItem("awq_adv")||"null");if(a)ADV={...ADVD,...a}}catch(e){}advUI();if(JSON.stringify(ADV)!==JSON.stringify(ADVD))advApply(false);
 document.fonts.ready.then(()=>{$("#fit").click()});

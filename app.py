@@ -149,6 +149,21 @@ def transcribe():
     except Exception as e:
         return jsonify(error=str(e)), 500
 
+TPLVARS = read("prompts/tplvars_prompt.md")
+
+@app.post("/api/tplvars")
+@need_login
+def tplvars():
+    text = (request.json or {}).get("text", "").strip()
+    if not text:
+        return jsonify(error="النص فارغ"), 400
+    try:
+        if MOCK:
+            return jsonify(variables=[{"name": "اسم الموظف", "text": "محمد لطرش"}])
+        return jsonify(gemini(TPLVARS, text, 0.2))
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
 @app.get("/health")
 def health():
     return "ok"
