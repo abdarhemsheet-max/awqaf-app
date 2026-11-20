@@ -4,38 +4,54 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>منشئ مراسلات الأوقاف</title>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <style>
 @font-face{font-family:"Sultan";src:url(static/fonts/Sultan-Normal.ttf);font-weight:400}
 @font-face{font-family:"Sultan";src:url(static/fonts/Sultan-Bold.ttf);font-weight:700}
-:root{--g:#17392b;--g2:#2d6a4f;--gold:#c0902f;--bd:#e3e7e3;--lh:1.6}
+:root{--g:#14352a;--g2:#1f6b4f;--g3:#e6f1ea;--gold:#b98a2e;--gold2:#fbf3df;--bd:#e0e5e0;--ink:#1d2a24;--mut:#66756d;--bg:#edf0ed;--lh:1.6}
 *{box-sizing:border-box}
-body{margin:0;font-family:"Noto Naskh Arabic",sans-serif;background:#e9ece9;color:#1c1c1c;height:100vh;display:flex;flex-direction:column}
-.top{background:linear-gradient(90deg,#10291f,#2d6a4f);color:#fff;display:flex;align-items:center;gap:14px;padding:0 16px;height:50px;flex:none}
-.top h1{font-size:18px;margin:0;flex:1}
-.top button{background:none;border:0;color:#fff;font:inherit;font-size:14px;padding:14px 10px;cursor:pointer;opacity:.7;border-bottom:3px solid transparent}
-.top button.on{opacity:1;border-color:var(--gold)}
-.main{flex:1;display:grid;grid-template-columns:330px 1fr;min-height:0}
-@media(max-width:820px){.main{grid-template-columns:1fr;overflow:auto}body{height:auto}}
-.side{background:#f5f7f5;border-left:1px solid var(--bd);overflow:auto;padding:12px}
-.sec{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px #0000000d}
-.sec h3{margin:0 0 6px;font-size:14px;color:var(--g);display:flex;gap:6px;align-items:center}
-.sec h3 i{background:var(--g);color:#fff;border-radius:50%;width:20px;height:20px;font-style:normal;font-size:12px;display:grid;place-items:center}
-label{display:block;font-size:12px;color:#555;margin:7px 0 2px}
-input[type=text],select,textarea{width:100%;font:inherit;font-size:14px;padding:7px 9px;border:1px solid #c6cbc6;border-radius:7px}
-textarea{min-height:70px;resize:vertical}
-.chips{display:flex;flex-wrap:wrap;gap:5px}
-.chip{padding:4px 11px;border:1px solid #c6cbc6;border-radius:16px;font-size:13px;cursor:pointer}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:"Tajawal","Noto Naskh Arabic",sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;flex-direction:column;font-size:15px}
+.top{background:linear-gradient(100deg,#0c231a 0%,#14352a 45%,#1f6b4f 100%);color:#fff;display:flex;align-items:center;gap:6px;padding:0 18px;height:58px;flex:none;box-shadow:0 2px 12px #0b1d1544;position:relative;z-index:5}
+.top h1{font-size:19px;margin:0;flex:1;display:flex;align-items:center;gap:10px;font-weight:700;white-space:nowrap}
+.top h1 svg{flex:none}
+.top h1 small{font-size:12px;font-weight:400;opacity:.7;border-right:1px solid #ffffff44;padding-right:10px}
+.top button{background:none;border:0;color:#fff;font:inherit;font-size:14px;font-weight:500;padding:8px 15px;cursor:pointer;opacity:.78;border-radius:999px;transition:.15s}
+.top button:hover{opacity:1;background:#ffffff1a}
+.top button.on{opacity:1;background:#ffffff26;box-shadow:inset 0 -2px 0 var(--gold)}
+#cnt{background:#ffffff1f;padding:4px 12px;border-radius:999px;font-size:12px;white-space:nowrap}
+.main{flex:1;display:grid;grid-template-columns:372px 1fr;min-height:0}
+@media(max-width:820px){.main{grid-template-columns:1fr;overflow:auto}body{height:auto}.top{padding:8px 10px;height:auto;flex-wrap:wrap;row-gap:4px}.top h1 small{display:none}.top h1{font-size:16px;flex:1 0 100%}.top button{padding:6px 11px;font-size:13px}#cnt{font-size:11px;padding:3px 8px}.side{overflow:visible}.stage{overflow-x:auto}}
+.side{background:#f6f8f6;border-left:1px solid var(--bd);overflow:auto;padding:14px;scrollbar-width:thin}
+.sec{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:0 1px 2px #14352a0d,0 4px 14px #14352a0a}
+.sec h3{margin:0 0 10px;font-size:15.5px;font-weight:700;color:var(--g);display:flex;gap:8px;align-items:center}
+.sec h3 i{background:linear-gradient(135deg,var(--g2),var(--g));color:#fff;border-radius:50%;width:24px;height:24px;font-style:normal;font-size:13px;display:grid;place-items:center;box-shadow:0 2px 6px #1f6b4f55}
+label{display:block;font-size:12.5px;font-weight:500;color:var(--mut);margin:10px 0 4px}
+input[type=text],select,textarea{width:100%;font:inherit;font-size:14.5px;padding:10px 12px;border:1px solid #cdd5ce;border-radius:11px;background:#fcfdfc;color:var(--ink);transition:.15s}
+input[type=text]:focus,select:focus,textarea:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px #1f6b4f24;background:#fff}
+textarea{min-height:80px;resize:vertical;line-height:1.8}
+input[type=range]{accent-color:var(--g2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 13px;border:1px solid #cdd5ce;background:#fff;border-radius:999px;font-size:13px;cursor:pointer;transition:.15s;user-select:none}
+.chip:hover{border-color:var(--g2);background:var(--g3)}
 .chip.on{background:var(--g);color:#fff;border-color:var(--g)}
-.btn{box-shadow:0 1px 3px #0002;transition:.15s;background:var(--g2);color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;font-size:14px;cursor:pointer}
-.btn.alt{background:#fff;color:var(--g);border:1px solid var(--g)}
-.btn.gold{background:var(--gold)}
-.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.tb button{padding:5px 9px;border:1px solid #c6cbc6;background:#fff;border-radius:6px;font:inherit;font-size:13px;cursor:pointer}
-.ck{display:flex;gap:6px;align-items:center;font-size:12.5px;color:#222;margin:2px 0}
-.hint{font-size:11.5px;color:#7a5b1d;background:#fbf3e0;border-radius:6px;padding:6px 8px;margin-top:7px;line-height:1.6}
-.stage{overflow:auto;padding:14px;text-align:center;background:radial-gradient(#c9cfc9,#b9c1b9)}
-.stat{position:sticky;top:0;display:inline-block;z-index:3;background:#fff;border-radius:20px;padding:4px 14px;font-size:13px;margin-bottom:8px;box-shadow:0 1px 4px #0003}
+.btn{box-shadow:0 1px 2px #14352a33,0 3px 8px #14352a1f;transition:.15s;background:linear-gradient(135deg,var(--g2),#175a41);color:#fff;border:0;border-radius:11px;padding:10px 16px;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn:active{transform:none}
+.btn:disabled{opacity:.7;cursor:wait;transform:none}
+.btn.alt{background:#fff;color:var(--g);border:1px solid #b9c7bd;box-shadow:none;font-weight:500}
+.btn.alt:hover{background:var(--g3)}
+.btn.gold{background:linear-gradient(135deg,#d1a444,var(--gold));color:#2b1f06}
+#gen{padding:13px 16px;font-size:16.5px;letter-spacing:.2px}
+#mic{padding:13px 14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tb button{padding:6px 11px;border:1px solid #cdd5ce;background:#fff;border-radius:8px;font:inherit;font-size:13px;cursor:pointer;transition:.15s}
+.tb button:hover{background:var(--g3);border-color:var(--g2)}
+.ck{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--ink);margin:4px 0}
+.ck input{accent-color:var(--g2);width:16px;height:16px}
+.hint{font-size:12.5px;color:#6f5416;background:var(--gold2);border-right:3px solid var(--gold);border-radius:8px;padding:8px 10px;margin-top:10px;line-height:1.7}
+.stage{overflow:auto;padding:18px;text-align:center;background:radial-gradient(#cdd5cd 1.1px,transparent 1.2px) 0 0/20px 20px,#e3e8e3}
+.stat{position:sticky;top:0;display:inline-block;z-index:3;background:#fff;border-radius:999px;padding:5px 16px;font-size:13px;font-weight:500;margin-bottom:10px;box-shadow:0 2px 8px #14352a26}
 .stat.ok{color:#1d7a3a}.stat.bad{color:#b3261e}
 .wrap{transform-origin:top center;display:block;width:210mm;margin:0 auto}
 .a4{margin-bottom:14px;width:210mm;height:296.6mm;background:#fff;position:relative;box-shadow:0 3px 12px #0005;overflow:hidden;text-align:right}
@@ -79,6 +95,20 @@ textarea{min-height:70px;resize:vertical}
 .btn:hover{filter:brightness(1.1)}
 .pn{position:absolute;bottom:5mm;left:0;right:0;text-align:center;font:11px sans-serif;color:#bbb}
 .bot{display:none}
+.a4{box-shadow:0 6px 28px #14352a33,0 0 0 1px #0000000d}
+.arch{max-width:920px;margin:20px auto;background:#fff;border-radius:18px;padding:16px;width:calc(100% - 24px);box-shadow:0 4px 20px #14352a14;border:1px solid var(--bd)}
+.it{display:flex;gap:12px;align-items:center;padding:12px;border-bottom:1px solid #eef1ee;border-radius:10px;transition:.15s}
+.it:hover{background:#f6f8f6}
+.it .t{flex:1;font-weight:500}.it small{display:block;color:var(--mut);font-size:12px;font-weight:400}
+.tag{font-size:11.5px;background:var(--g3);color:var(--g);padding:3px 11px;border-radius:999px;font-weight:500}
+.toast{background:var(--g);color:#fff;padding:11px 22px;border-radius:999px;font-size:14.5px;box-shadow:0 8px 28px #0006;animation:tin .25s ease}
+@keyframes tin{from{opacity:0;transform:translate(-50%,10px)}}
+.an div{border-right:4px solid var(--g2);background:#f1f8f3;border-radius:10px;padding:8px 11px}
+.pop{border-radius:16px;box-shadow:0 12px 36px #14352a44;border:1px solid #b9c7bd}
+.mode{background:#fff3cf!important;border-color:var(--gold)!important}
+#ex{margin-top:8px;align-items:center}#ex span.l{font-size:12px;color:var(--mut);margin-left:2px}
+.side::-webkit-scrollbar,.stage::-webkit-scrollbar{width:8px}.side::-webkit-scrollbar-thumb,.stage::-webkit-scrollbar-thumb{background:#b9c4bc;border-radius:8px}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media print{
 @page{size:A4;margin:0}
 html,body{height:auto!important;background:#fff!important;display:block!important}
@@ -92,12 +122,12 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
 </style>
 </head>
 <body>
-<div class="top"><h1>منشئ مراسلات الأوقاف</h1><button class="on" id="tNew">مراسلة جديدة</button><button id="tArc">الأرشيف</button><button id="tKey" style="display:none">🔑 مفتاح Gemini</button><span id="cnt" style="margin-inline-start:auto;font-size:12px;opacity:.85"></span></div>
+<div class="top"><h1><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#b98a2e"/><path d="M10 8h10l5 5v13H10z" fill="#fff"/><path d="M20 8v5h5" fill="#e9d6a3"/><path d="M13 17h9M13 20.5h9M13 24h6" stroke="#14352a" stroke-width="1.6" stroke-linecap="round"/></svg>منشئ مراسلات الأوقاف<small>مكتب أوقاف القره بوللي</small></h1><button class="on" id="tNew">مراسلة جديدة</button><button id="tArc">الأرشيف</button><button id="tKey" style="display:none">🔑 مفتاح Gemini</button><span id="cnt" style="margin-inline-start:auto;font-size:12px;opacity:.85"></span></div>
 <div class="main" id="mainView">
 <aside class="side">
  <div class="sec"><h3><i>1</i>قول شن تبي</h3>
   <textarea id="topic" style="min-height:110px" placeholder="احكي أو اكتب بلهجتك، مثال: نبي نكلف محمد لطرش يغطي زيارة رئيس الهيئة يوم الأحد ويدز المادة على صفحة المكتب"></textarea>
-  <div class="row"><button class="btn alt" id="mic">🎙 تكلم</button><button class="btn" id="gen" style="flex:1">✦ حلل وصيغ</button></div>
+  <div class="chips" id="ex"><span class="l">ابدأ بـ:</span><span class="chip" data-t="نبي نكلف ">تكليف</span><span class="chip" data-t="نبي خطاب شكر لـ ">شكر</span><span class="chip" data-t="نبي دعوة لـ ">دعوة</span><span class="chip" data-t="نبي نطلب من ">طلب</span><span class="chip" data-t="نبي نفيد المدير بخصوص ">إفادة للمدير</span></div><div class="row"><button class="btn alt" id="mic">🎙 تكلم</button><button class="btn" id="gen" style="flex:1">✦ حلل وصيغ</button></div>
   <div class="hint">Gemini يفهم الطلب، يختار نوع المراسلة والمرسل إليه بنفسه، ويكتب الصيغة الأفضل ويحللها. ما فيش قوالب ولا اختيارات.</div>
  </div>
  <div class="hint" id="anNote" style="display:none;background:#e7f5ec;color:#17392b">✓ تم التحليل (قانونياً ولغوياً ونحوياً وصياغةً) في الخلفية، والمراسلة هي النسخة الأفضل بعد التحليل.</div>
@@ -186,7 +216,7 @@ $("#gen").onclick=async()=>{const v=$("#topic").value.trim();if(!v)return toast(
  try{last=await api("/api/compose",{text:v});
   setBody(blocksToHtml(last.blocks||[]));
   if(Array.isArray(last.cc)&&last.cc.length){last.cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});cc=CC.filter(c=>last.cc.includes(c));renderCks();drawBottom()}
-  $("#fit").click();showAn();toast("النوع: "+(last.type||""))}
+  $("#fit").click();showAn();toast("النوع: "+(last.type||""));if(innerWidth<=820)setTimeout(()=>$(".stage").scrollIntoView({behavior:"smooth"}),300)}
  catch(e){toast("تعذر: "+e.message)}
  $("#gen").disabled=false;$("#gen").textContent="✦ حلل وصيغ"};
 function showAn(){const n=$("#anNote");n.style.display="block";const m=(last&&last.missing)||[];
@@ -286,7 +316,7 @@ $("#q").oninput=list;
 function view(n){$("#mainView").classList.toggle("hid",!n);$("#arcView").classList.toggle("hid",!!n);$("#tNew").classList.toggle("on",!!n);$("#tArc").classList.toggle("on",!n);if(n)setTimeout(()=>{scale();fitCheck()},30)}
 $("#tNew").onclick=()=>view(1);$("#tArc").onclick=()=>view(0);
 window.onresize=()=>{scale()};
-drawBottom();list();
+drawBottom();list();$$("#ex .chip").forEach(c=>c.onclick=()=>{const t=$("#topic");t.value=c.dataset.t;t.focus();t.setSelectionRange(t.value.length,t.value.length)});
 document.fonts.ready.then(()=>{$("#fit").click()});
 </script>
 </body></html>
