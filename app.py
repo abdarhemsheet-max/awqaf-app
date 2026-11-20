@@ -9,6 +9,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-3-flash-preview")
+FALLBACK_MODELS = ["gemini-3.1-flash-lite", "gemini-flash-latest"]
 PASSWORD = os.environ.get("APP_PASSWORD", "")
 MOCK = os.environ.get("MOCK") == "1"
 
@@ -56,18 +57,34 @@ def index():
 def gemini(system, user, temperature=0.4):
     if not GEMINI_KEY:
         raise RuntimeError("GEMINI_API_KEY غير مضبوط")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
     body = {
         "systemInstruction": {"parts": [{"text": system}]},
         "contents": [{"role": "user", "parts": [{"text": user}]}],
         "generationConfig": {"temperature": temperature, "responseMimeType": "application/json"},
     }
-    r = requests.post(url, params={"key": GEMINI_KEY}, json=body, timeout=100)
-    if r.status_code != 200:
-        raise RuntimeError(f"Gemini {r.status_code}: {r.text[:300]}")
-    txt = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-    txt = re.sub(r"^```(?:json)?|```$", "", txt.strip()).strip()
-    return json.loads(txt)
+    # الموديل المضبوط أولاً ثم بدائل؛ وإعادة محاولة عند الانشغال (429/5xx) أو JSON غير صالح
+    models = [MODEL] + [m for m in FALLBACK_MODELS if m != MODEL]
+    last = "تعذر الاتصال بـ Gemini"
+    for m in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent"
+        try:
+            r = requests.post(url, params={"key": GEMINI_KEY}, json=body, timeout=60)
+        except requests.RequestException as e:
+            last = f"Gemini: {e}"
+            continue
+        if r.status_code != 200:
+            last = f"Gemini {r.status_code}: {r.text[:300]}"
+            if r.status_code in (400, 401, 403):
+                break
+            continue
+        try:
+            parts = r.json()["candidates"][0]["content"]["parts"]
+            txt = "".join(p.get("text", "") for p in parts).strip()
+            txt = re.sub(r"^```(?:json)?|```$", "", txt).strip()
+            return json.loads(txt)
+        except (KeyError, IndexError, ValueError) as e:
+            last = f"رد غير صالح من {m}: {e}"
+    raise RuntimeError(last)
 
 MOCK_LETTER = {
     "type": "تكليف",

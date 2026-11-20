@@ -4,16 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="مراسلات الأوقاف"><meta name="theme-color" content="#14352a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Crect width='34' height='34' rx='9' fill='%23b98a2e'/%3E%3Cpath d='M10 8h10l5 5v13H10z' fill='%23fff'/%3E%3C/svg%3E">
 <title>منشئ مراسلات الأوقاف</title>
 <style>
-@font-face{font-family:"Amiri";src:url(static/fonts/Amiri-Regular.ttf);font-weight:400}
-@font-face{font-family:"Amiri";src:url(static/fonts/Amiri-Bold.ttf);font-weight:700}
-@font-face{font-family:"Tajawal";src:url(static/fonts/Tajawal-Regular.ttf);font-weight:400}
-@font-face{font-family:"Tajawal";src:url(static/fonts/Tajawal-Medium.ttf);font-weight:500}
-@font-face{font-family:"Tajawal";src:url(static/fonts/Tajawal-Bold.ttf);font-weight:700}
-@font-face{font-family:"Noto Naskh Arabic";src:url(static/fonts/NotoNaskhArabic.ttf);font-weight:400 700}
-@font-face{font-family:"Sultan";src:url(static/fonts/Sultan-Normal.ttf);font-weight:400}
-@font-face{font-family:"Sultan";src:url(static/fonts/Sultan-Bold.ttf);font-weight:700}
+@font-face{font-display:swap;font-family:"Amiri";src:url(static/fonts/Amiri-Regular.ttf);font-weight:400}
+@font-face{font-display:swap;font-family:"Amiri";src:url(static/fonts/Amiri-Bold.ttf);font-weight:700}
+@font-face{font-display:swap;font-family:"Tajawal";src:url(static/fonts/Tajawal-Regular.ttf);font-weight:400}
+@font-face{font-display:swap;font-family:"Tajawal";src:url(static/fonts/Tajawal-Medium.ttf);font-weight:500}
+@font-face{font-display:swap;font-family:"Tajawal";src:url(static/fonts/Tajawal-Bold.ttf);font-weight:700}
+@font-face{font-display:swap;font-family:"Noto Naskh Arabic";src:url(static/fonts/NotoNaskhArabic.ttf);font-weight:400 700}
+@font-face{font-display:swap;font-family:"Sultan";src:url(static/fonts/Sultan-Normal.ttf);font-weight:400}
+@font-face{font-display:swap;font-family:"Sultan";src:url(static/fonts/Sultan-Bold.ttf);font-weight:700}
 :root{--lh:2;--g:#14352a;--g2:#1f6b4f;--g3:#e6f1ea;--gold:#b98a2e;--gold2:#fbf3df;--bd:#e0e5e0;--ink:#1d2a24;--mut:#66756d;--bg:#edf0ed}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -139,9 +140,9 @@ details.sec .sub{margin:14px 0 6px;font-size:14px;color:var(--g);border-bottom:1
 @media print{
 @page{size:A4;margin:0}
 html,body{height:auto!important;background:#fff!important;display:block!important}
-.top,.side,.stat,.toast,.pop,#arcView,.pn{display:none!important}
+.top,.side,.stat,.toast,.pop,#arcView,#tplView,#tplBar,.modal,.pn{display:none!important}
 .main{display:block!important}.stage{padding:0!important;background:none!important;overflow:visible!important}
-.wrap{transform:none!important;height:auto!important;width:210mm}
+.wrap{transform:none!important;height:auto!important;width:210mm;margin:0!important}
 .a4{box-shadow:none!important;margin:0!important;page-break-after:always;break-after:page}
 .a4:last-child{page-break-after:auto;break-after:auto}
 .ph{visibility:hidden}.blank{background:none!important}
@@ -216,7 +217,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  <input type="text" id="q" placeholder="بحث في الأرشيف…">
  <div id="list"></div>
  <div class="row"><button class="btn alt" id="merge">دمج المحدد في PDF واحد</button></div>
- <div class="hint">الأرشيف محفوظ في هذا المتصفح. الدمج في مرحلة قادمة.</div>
+ <div class="hint">الأرشيف محفوظ في هذا المتصفح. حدد أكثر من مراسلة بالمربعات واضغط «دمج» لملف PDF واحد.</div>
 </div></div>
 <div class="hid" id="tplView"><div class="arch">
  <h3 style="margin:0 0 6px;color:var(--g)">📋 مراسلات معتادة (قوالب)</h3>
@@ -261,7 +262,8 @@ const bl=(v,n)=>v?v:`<span class="blank">${".".repeat(n)}</span>`;
 
 
 const FRAG=h=>h.replace(/\{\{\s*تاريخ\s*\}\}/g,'<bdi dir="ltr">2026 / ...... / ......</bdi>').replace(/\{\{\s*فراغ\s*\}\}/g,'<span class="blank">..............</span>');
-function blocksToHtml(bl){return dg(bl.map(b=>{const h=FRAG(b.html||"");
+const cleanTag=h=>String(h==null?"":h).replace(/<\/?[^>]*>/g,t=>(/^<\/?b>$/i.test(t)||/^<\/span>$/i.test(t)||/^<span class="var" data-v="[^"<>]*">$/.test(t))?t:"");
+function blocksToHtml(bl){return dg(bl.map(b=>{const h=FRAG(cleanTag(b.html||""));
  if(b.role=="to")return `<p class="to">${h}</p>`;if(b.role=="greeting")return `<p class="gr">${h}</p>`;
  if(b.role=="table")return tableHtml(b.headers,b.rows);
  if(b.role=="bullet")return `<ul><li>${h}</li></ul>`;
@@ -357,7 +359,7 @@ $("#popX").onclick=()=>$("#pop").style.display="none";
 $("#popGo").onclick=async()=>{if(!sr)return;const req=$("#popIn").value.trim();if(!req)return toast("اختار أو اكتب الطلب");
  const txt=sr.toString();$("#popGo").textContent="…";
  try{const j=await api("/api/edit",{selection:txt,request:req,context:$$(".body").map(b=>b.innerText).join("\n")});
-  sr.deleteContents();const m=document.createElement("span");m.style.background="#e3f4e7";m.innerHTML=j.text;sr.insertNode(m);
+  sr.deleteContents();const m=document.createElement("span");m.style.background="#e3f4e7";m.innerHTML=cleanTag(j.text);sr.insertNode(m);
   $("#pop").style.display="none";getSelection().removeAllRanges();fitCheck();toast("تم تعديل الجزء")}
  catch(e){toast("تعذر: "+e.message)}$("#popGo").textContent="طبّق"};
 let REC=null,RECON=false,baseTxt="",micLi=0;const MICL=["ar-LY","ar-SA"];
@@ -465,11 +467,11 @@ function getBody(){return $$(".body").map(b=>b.innerHTML).join("")}
 function setLH(v){pagesEl.style.setProperty("--lh",v);$("#lh").value=v;$("#lhv").textContent=(+v).toFixed(2)}
 $("#lh").oninput=e=>{setLH(e.target.value);layoutAll()};
 $("#sigSel").onchange=e=>{sigChoice=e.target.value;layoutAll()};
-const FSP={prev:{lh:2,min:1.5},big:{lh:1.6,min:1.4}};let FSK="prev";
+let QUIET=true;const FSP={prev:{lh:2,min:1.5},big:{lh:1.6,min:1.4}};let FSK="prev";
 function setFS(k){FSK=k;if(typeof ADV!=="undefined"&&ADV.fs!=null){ADV.fs=null;try{localStorage.setItem("awq_adv",JSON.stringify(ADV))}catch(e){}["--fs","--fs2","--fs3"].forEach(x=>pagesEl.style.removeProperty(x));if(typeof advUI==="function")advUI()}$("#wrap").classList.toggle("big",k==="big");$("#fs").value=k;try{localStorage.setItem("awq_fs",k)}catch(e){}}
 $("#fs").onchange=e=>{setFS(e.target.value);$("#fit").click()};
 $("#fit").onclick=()=>{const P=FSP[FSK];setLH(P.lh);layoutAll();if(PN>1){for(let v=P.lh-.05;v>=P.min-.001;v-=.05){setLH(v.toFixed(2));layoutAll();if(PN===1)break}
- if(PN>1){setLH(P.lh);layoutAll();toast("النص أطول من صفحة، انتقل للصفحة الثانية")}}else toast("صفحة واحدة بتباعد "+P.lh.toFixed(2))};
+ if(PN>1){setLH(P.lh);layoutAll();toast("النص أطول من صفحة، انتقل للصفحة الثانية")}}else if(!QUIET)toast("صفحة واحدة بتباعد "+P.lh.toFixed(2))};
 $("#bB").onclick=()=>document.execCommand("bold");
 $("#bC").onclick=()=>document.execCommand("justifyCenter");
 $("#bU").onclick=()=>document.execCommand("undo");
@@ -477,31 +479,44 @@ $("#bL").onclick=()=>document.execCommand("insertHTML",false,"<ul><li>بند</li
 $("#clear").onclick=()=>{$$(".blank").forEach(b=>b.classList.remove("blank"));toast("أُزيل التظليل")};
 const dlBlob=(b,n)=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)};
 function pdfName(){const d=new Date(),t=((last&&last.type)||"مراسلة").replace(/[\\\/:*?"<>|]+/g,"").trim().replace(/\s+/g,"_");return t+"_"+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+".pdf"}
-async function makePDF(){await document.fonts.ready;
- if(!window.html2canvas||!window.jspdf)throw new Error("مكتبة PDF ما تحملت");
- const pages=$$(".a4"),pdf=new window.jspdf.jsPDF({unit:"mm",format:[210,296.6],orientation:"portrait",compress:true});
- const wcls=$("#wrap").className,lhv=pagesEl.getAttribute("style")||"";
+async function pagesToPdf(pdf){await document.fonts.ready;
+ if(!window.html2canvas)throw new Error("مكتبة PDF ما تحملت");
+ const pages=$$(".a4"),wcls=$("#wrap").className,lhv=pagesEl.getAttribute("style")||"";
  for(let i=0;i<pages.length;i++){
   const cv=await html2canvas(pages[i],{scale:3,backgroundColor:"#ffffff",useCORS:true,logging:false,scrollX:0,scrollY:0,
    onclone:(d,el)=>{const h=d.createElement("div");h.className=wcls;h.style.cssText="transform:none;height:auto;width:210mm;margin:0;position:absolute;top:0;left:0;"+lhv;
     d.body.innerHTML="";d.body.style.cssText="margin:0;display:block;height:auto;overflow:visible;background:#fff";d.body.appendChild(h);h.appendChild(el);
     el.style.boxShadow="none";el.style.margin="0";
     d.querySelectorAll(".ph,.pn").forEach(x=>x.style.visibility="hidden");d.querySelectorAll(".blank").forEach(x=>x.style.background="none")}});
-  if(i)pdf.addPage([210,296.6]);pdf.addImage(cv.toDataURL("image/jpeg",.94),"JPEG",0,0,210,296.6)}
- return {blob:pdf.output("blob"),name:pdfName()}}
+  if(pdf._cnt)pdf.addPage([210,296.6]);pdf._cnt=(pdf._cnt||0)+1;pdf.addImage(cv.toDataURL("image/jpeg",.94),"JPEG",0,0,210,296.6)}}
+const newPdf=()=>{if(!window.jspdf)throw new Error("مكتبة PDF ما تحملت");return new window.jspdf.jsPDF({unit:"mm",format:[210,296.6],orientation:"portrait",compress:true})};
+async function makePDF(){const pdf=newPdf();await pagesToPdf(pdf);return {blob:pdf.output("blob"),name:pdfName()}}
 async function withBusy(id,fn){const b=$(id),o=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin">⟳</span> يجهّز…';try{await fn()}catch(e){toast("تعذر: "+e.message)}b.disabled=false;b.innerHTML=o}
 $("#pdf").onclick=()=>withBusy("#pdf",async()=>{const r=await makePDF();dlBlob(r.blob,r.name);toast("تم تنزيل "+r.name)});
-$("#wa").onclick=()=>withBusy("#wa",async()=>{const r=await makePDF(),f=new File([r.blob],r.name,{type:"application/pdf"});
- if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:r.name});return}catch(e){if(e&&e.name==="AbortError")return}}
- dlBlob(r.blob,r.name);window.open("https://wa.me/?text="+encodeURIComponent("مرفق: "+r.name),"_blank");toast("نزل الملف، أرفقه في واتساب")});
+let WAP=null;const waSig=()=>getBody()+"|"+cc.join(",")+"|"+(pagesEl.getAttribute("style")||"")+"|"+$("#sn").value+$("#st").value+"|"+$("#wrap").className;
+async function waSend(blob,name){const f=new File([blob],name,{type:"application/pdf"});
+ if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name});return"ok"}catch(e){return e&&e.name==="AbortError"?"abort":"fail"}}return"none"}
+const waFallback=(blob,name)=>{dlBlob(blob,name);window.open("https://wa.me/?text="+encodeURIComponent("مرفق: "+name),"_blank");toast("نزل الملف، أرفقه في واتساب")};
+$("#wa").onclick=async()=>{const b=$("#wa");
+ if(WAP&&WAP.sig===waSig()){const p=WAP;WAP=null;b.innerHTML="➤ إرسال واتساب";const r=await waSend(p.blob,p.name);if(r==="ok"||r==="abort")return;return waFallback(p.blob,p.name)}
+ WAP=null;b.innerHTML="➤ إرسال واتساب";
+ await withBusy("#wa",async()=>{const sig=waSig(),r=await makePDF(),st=await waSend(r.blob,r.name);if(st==="ok"||st==="abort")return;
+  if(st==="fail"){WAP={blob:r.blob,name:r.name,sig};toast("الملف جاهز، اضغط الزر مرة ثانية لإكمال المشاركة");return}
+  waFallback(r.blob,r.name)});
+ if(WAP)b.innerHTML="➤ اضغط للإرسال (الملف جاهز)"};
 $("#prt").onclick=()=>{toast("اختر «حفظ بصيغة PDF» وألغِ الرؤوس والتذييلات");setTimeout(()=>window.print(),600)};
-$("#merge").onclick=()=>toast("الدمج: مرحلة قادمة");
+$("#merge").onclick=()=>withBusy("#merge",async()=>{const ids=$$("#list [data-c]:checked").map(c=>+c.dataset.c);
+ if(!ids.length)return toast("حدد مراسلة أو أكثر بالمربعات أولاً");
+ const keep={h:getBody(),cc:[...cc],last},pdf=newPdf();view(1);await new Promise(r=>setTimeout(r,250));
+ try{for(const x of store.filter(y=>ids.includes(y.id))){setBody(x.h);cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();await document.fonts.ready;await new Promise(r=>setTimeout(r,200));await pagesToPdf(pdf)}}
+ finally{setBody(keep.h);cc=keep.cc;last=keep.last;renderCks();drawBottom()}
+ const d=new Date();dlBlob(pdf.output("blob"),"مراسلات_مدمجة_"+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+".pdf");view(0);toast("تم دمج "+ids.length+" مراسلة في ملف واحد")});
 
 let store=[];try{store=JSON.parse(localStorage.getItem("awq2")||"[]")}catch(e){}
 const persist=()=>{try{localStorage.setItem("awq2",JSON.stringify(store))}catch(e){}};
 $("#save").onclick=()=>{store.unshift({id:Date.now(),t:type,h:getBody(),s:(($$(".body")[0].innerText||"").split("\n")[0]||"").slice(0,60),d:new Date().toLocaleDateString("ar-LY"),cc:[...cc]});persist();list();toast("حُفظت في الأرشيف")};
-function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||x.s.includes(q)||x.t.includes(q)).map(x=>`<div class="it"><input type="checkbox"><div class="t">${x.s}<small>${x.d}</small></div><span class="tag">${x.t}</span><button class="btn alt" data-o="${x.id}">فتح</button><button class="btn alt" data-x="${x.id}">حذف</button></div>`).join("")||"<div style='padding:14px;color:#888'>لا توجد مراسلات محفوظة بعد.</div>";
- $$("[data-o]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.o);setBody(x.h);cc=x.cc;$$("#cks input").forEach(i=>i.checked=cc.includes(i.value));drawBottom();view(1)});
+function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||x.s.includes(q)||x.t.includes(q)).map(x=>`<div class="it"><input type="checkbox" data-c="${x.id}"><div class="t">${x.s}<small>${x.d}</small></div><span class="tag">${x.t}</span><button class="btn alt" data-o="${x.id}">فتح</button><button class="btn alt" data-x="${x.id}">حذف</button></div>`).join("")||"<div style='padding:14px;color:#888'>لا توجد مراسلات محفوظة بعد.</div>";
+ $$("[data-o]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.o);setBody(x.h);cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();view(1)});
  $$("[data-x]").forEach(b=>b.onclick=()=>{store=store.filter(y=>y.id!=b.dataset.x);persist();list()})}
 $("#q").oninput=list;
 function view(n){const m=n===2?"tpl":(n?"new":"arc");
@@ -532,13 +547,14 @@ $("#tblMan").onclick=()=>{const r=Math.max(1,Math.min(30,+$("#tblR").value||3)),
  insertBlockHtml(tableHtml(Array(c).fill(""),Array.from({length:r},()=>Array(c).fill(""))))};
 function curCell(){const s=getSelection(),n=s.anchorNode,e=n&&(n.nodeType===1?n:n.parentElement);return e&&e.closest?e.closest(".body td,.body th"):null}
 function tblOp(op){const c=curCell();if(!c)return toast("اضغط داخل خلية في الجدول أولاً");
- const tr=c.parentElement,t=c.closest("table"),ci=[...tr.children].indexOf(c);
+ const tr=c.parentElement,t=c.closest("table"),ci=[...tr.children].indexOf(c),ti=$$(".body table.dt").indexOf(t),ri=[...t.rows].indexOf(tr);
  if(op==="ar"){const n=document.createElement("tr");for(let i=0;i<tr.children.length;i++)n.appendChild(document.createElement("td"));tr.after(n)}
  if(op==="ac"){[...t.rows].forEach((r,ri)=>{const x=document.createElement(r.children[ci]&&r.children[ci].tagName==="TH"?"th":"td");r.children[ci]?r.children[ci].after(x):r.appendChild(x)})}
  if(op==="dr"){tr.remove();if(!t.rows.length)t.remove()}
  if(op==="dc"){[...t.rows].forEach(r=>{if(r.children[ci])r.children[ci].remove()});if(!t.rows[0]||!t.rows[0].children.length)t.remove()}
  if(op==="dt"){t.remove()}
- layoutAll()}
+ layoutAll();const T=$$(".body table.dt")[ti],c2=T&&T.rows[Math.min(ri,T.rows.length-1)]&&T.rows[Math.min(ri,T.rows.length-1)].children[Math.min(ci,T.rows[0].children.length-1)];
+ if(c2){const rg=document.createRange();rg.selectNodeContents(c2);rg.collapse(true);const sl=getSelection();sl.removeAllRanges();sl.addRange(rg)}}
 $("#tAr").onclick=()=>tblOp("ar");$("#tAc").onclick=()=>tblOp("ac");$("#tDr").onclick=()=>tblOp("dr");$("#tDc").onclick=()=>tblOp("dc");$("#tDt").onclick=()=>tblOp("dt");
 const ADVD={fs:null,gap:2,mt:50,mb:22,mr:25,just:true};let ADV={...ADVD};
 function advUI(){const f=ADV.fs==null?(FSK==="big"?18.5:15):ADV.fs;$("#fsz").value=f;$("#fsv").textContent=f;
@@ -559,6 +575,9 @@ function bumpSize(d){const r=selR;if(!r||r.collapsed)return toast("حدد الن
  document.execCommand("insertHTML",false,`<span style="font-size:${np}pt">${dv.innerHTML}</span>`);setTimeout(()=>{fitCheck()},0);toast("حجم الخط المحدد: "+np+"pt")}
 $("#aPlus").onclick=()=>bumpSize(1);$("#aMinus").onclick=()=>bumpSize(-1);
 
+const OKT=new Set(["P","UL","LI","B","STRONG","SPAN","TABLE","TBODY","THEAD","TR","TD","TH","BDI","BR","DIV","I","U"]);
+function safeHtml(h){const d=new DOMParser().parseFromString("<body>"+h+"</body>","text/html");
+ d.body.querySelectorAll("*").forEach(e=>{if(!OKT.has(e.tagName)){e.remove();return}[...e.attributes].forEach(a=>{const n=a.name;if(!(n==="class"||n==="data-v"||n==="dir"||(n==="style"&&/^font-size:\s*[\d.]+pt;?$/.test(a.value))))e.removeAttribute(n)})});return d.body.innerHTML}
 const WD=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
 const V=(n,d)=>`<span class="var" data-v="${n}">${d}</span>`;
 function tplVars(html){const d=document.createElement("div");d.innerHTML=html;const o=[],seen={};d.querySelectorAll(".var").forEach(sp=>{const n=sp.dataset.v;if(n&&!seen[n]){seen[n]=1;o.push({name:n,def:sp.textContent})}});return o}
@@ -626,9 +645,9 @@ $("#tplSave").onclick=()=>{const name=$("#tplName").value.trim();if(!name)return
  const k=L.findIndex(x=>x.id===o.id);if(k>=0)L[k]=o;else L.unshift(o);tplPersist(L);tplEnd();view(2);toast("تم حفظ القالب")};
 $("#tplExp").onclick=()=>dlBlob(new Blob([JSON.stringify(tplLoad(),null,1)],{type:"application/json"}),"قوالب-المراسلات.json");
 $("#tplImp").onclick=()=>$("#tplFile").click();
-$("#tplFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const A=JSON.parse(rd.result);if(!Array.isArray(A))throw 0;const L=tplLoad();A.forEach(t=>{if(t&&t.html&&t.name){t.vars=tplVars(t.html);const k=L.findIndex(x=>x.id===t.id);if(k>=0)L[k]=t;else L.push(Object.assign({id:Date.now()+Math.floor(Math.random()*1000)},t))}});tplPersist(L);tplRender();toast("تم الاستيراد")}catch(x){toast("الملف غير صالح")}};rd.readAsText(f);e.target.value=""};
+$("#tplFile").onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const A=JSON.parse(rd.result);if(!Array.isArray(A))throw 0;const L=tplLoad();A.forEach(t=>{if(t&&t.html&&t.name){t.html=safeHtml(String(t.html));t.name=String(t.name);t.type=String(t.type||"");t.cc=Array.isArray(t.cc)?t.cc.map(String):[];t.vars=tplVars(t.html);const k=L.findIndex(x=>x.id===t.id);if(k>=0)L[k]=t;else L.push(Object.assign({id:Date.now()+Math.floor(Math.random()*1000)},t))}});tplPersist(L);tplRender();toast("تم الاستيراد")}catch(x){toast("الملف غير صالح")}};rd.readAsText(f);e.target.value=""};
 try{const k=localStorage.getItem("awq_fs");if(k&&FSP[k])setFS(k)}catch(e){}
 try{const a=JSON.parse(localStorage.getItem("awq_adv")||"null");if(a)ADV={...ADVD,...a}}catch(e){}advUI();if(JSON.stringify(ADV)!==JSON.stringify(ADVD))advApply(false);
-document.fonts.ready.then(()=>{$("#fit").click()});
+document.fonts.ready.then(()=>{$("#fit").click();QUIET=false});
 </script>
 </body></html>
