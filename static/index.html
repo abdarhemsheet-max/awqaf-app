@@ -269,7 +269,7 @@ function blocksToHtml(bl){return dg(bl.map(b=>{const h=FRAG(b.html||"");
  if(b.role=="farewell")return `<p class="cx">${h}</p>`;return `<p>${h}</p>`}).join(""))}
 let last=null;
 const STATIC=/github\.io$/.test(location.hostname)||location.search.includes("static");
-const KEYN="awq_gkey",GMODELS=["gemini-3-flash-preview","gemini-flash-latest","gemini-3.1-flash-lite"];
+const KEYN="awq_gkey",GMODELS=["gemini-3-flash-preview","gemini-3.1-flash-lite","gemini-flash-latest"];
 const EMBED_KEY="__GEMINI_KEY__";
 const getKey=()=>{let k="";try{k=localStorage.getItem(KEYN)||""}catch(e){}return k||(EMBED_KEY.startsWith("__")?"":EMBED_KEY)};
 const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
@@ -293,7 +293,7 @@ $("#mdlBtn").onclick=openKeys;updProv();
 async function claudeGem(file,user){const key=getCKey();if(!key){openKeys();throw new Error("ضع مفتاح Claude أولاً")}
  const sys=await (await fetch(file)).text(),sel=lsGet("awq_cmodel"),ms=sel?[sel,...CAUTO.filter(m=>m!==sel)]:CAUTO;let err="";
  for(const m of ms){
-  try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+  try{const r=await fx("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
    body:JSON.stringify({model:m,max_tokens:4096,system:sys,messages:[{role:"user",content:user}]})});
    if(!r.ok){const tx=await r.text();err=r.status==429?"⏳ Claude وصل حد الاستعمال، استنى شوية":"Claude "+r.status+": "+tx.slice(0,160);
     if(r.status==401)throw new Error("مفتاح Claude غير صحيح");if(r.status==403||r.status==400)throw new Error(err);continue}
@@ -307,27 +307,29 @@ function cntShow(){let n=0;try{n=+localStorage.getItem(dayK())||0}catch(e){}cons
 function cntAdd(){try{localStorage.setItem(dayK(),(+localStorage.getItem(dayK())||0)+1)}catch(e){}cntShow()}
 cntShow();
 function quotaMsg(txt){return /PerDay|per day|daily/i.test(txt)?"⛔ وصل مفتاح Gemini للحد اليومي المجاني. جرّب بكرة أو استعمل مفتاح آخر (🔑).":"⏳ المفتاح وصل حد الاستعمال في الدقيقة. استنى دقيقة وأعد المحاولة."}
+function fx(u,o,ms){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||40000);return fetch(u,Object.assign({},o,{signal:c.signal})).finally(()=>clearTimeout(t))}
+const DEAD={};
 const getSel=()=>{try{return localStorage.getItem("awq_model")||""}catch(e){return""}};
 const modelList=()=>{const x=getSel();return x?[x,...GMODELS.filter(m=>m!==x)]:GMODELS};
 async function gemRaw(parts,temp){let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
  let err="",q429="";
- for(const m of modelList()){
-  try{const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
+ for(const m of modelList()){if(DEAD[m]>Date.now()){q429=q429||"PerDay";continue}
+  try{const r=await fx("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
    body:JSON.stringify({contents:[{role:"user",parts}],generationConfig:{temperature:temp}})});
-   if(!r.ok){const tx=await r.text();err="Gemini "+r.status+": "+tx.slice(0,160);if(r.status==429){q429=tx;continue}if(r.status==400||r.status==403)throw new Error(err);continue}
+   if(!r.ok){const tx=await r.text();err="Gemini "+r.status+": "+tx.slice(0,160);if(r.status==429){if(/PerDay/i.test(tx))DEAD[m]=Date.now()+30*60000;q429=q429.includes("PerDay")?q429:tx;continue}if(r.status==400||r.status==403)throw new Error(err);continue}
    const j=await r.json(),out=j.candidates[0].content.parts.filter(x=>x.text).map(x=>x.text).join("").trim();cntAdd();return out}
   catch(e){if(/^Gemini 40[03]/.test(e.message))throw e;err=e.message}}
- if(q429)throw new Error(quotaMsg(q429));throw new Error(err||"تعذر الاتصال")}
+ if(q429)throw new Error(quotaMsg(q429));throw new Error(/abort/i.test(err)?"انتهت المهلة، أعد المحاولة بعد لحظات":(err||"تعذر الاتصال"))}
 async function gem(file,user,temp){if(getProv()==="claude")return claudeGem(file,user);let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
  const sys=await (await fetch(file)).text();let err="",q429="";
- for(const m of modelList()){
-  try{const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
+ for(const m of modelList()){if(DEAD[m]>Date.now()){q429=q429||"PerDay";continue}
+  try{const r=await fx("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
    body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:{temperature:temp,responseMimeType:"application/json"}})});
-   if(!r.ok){const tx=await r.text();err="Gemini "+r.status+": "+tx.slice(0,160);if(r.status==429){q429=q429.includes("PerDay")?q429:tx;continue}if(r.status==400||r.status==403)throw new Error(err);continue}
+   if(!r.ok){const tx=await r.text();err="Gemini "+r.status+": "+tx.slice(0,160);if(r.status==429){if(/PerDay/i.test(tx))DEAD[m]=Date.now()+30*60000;q429=q429.includes("PerDay")?q429:tx;continue}if(r.status==400||r.status==403)throw new Error(err);continue}
    const j=await r.json();const t=j.candidates[0].content.parts.filter(x=>x.text).map(x=>x.text).join("").trim().replace(/^```(?:json)?|```$/g,"").trim();const out=JSON.parse(t);cntAdd();return out}
   catch(e){if(/^Gemini 40[03]/.test(e.message))throw e;err=e.message}}
  if(q429)throw new Error(quotaMsg(q429));
- throw new Error(err||"تعذر الاتصال")}
+ throw new Error(/abort/i.test(err)?"انتهت المهلة، أعد المحاولة بعد لحظات":(err||"تعذر الاتصال"))}
 async function api(path,body){
  if(STATIC){if(path=="/api/compose")return gem("prompts/system_prompt.md",body.text,0.4);
   if(path=="/api/tplvars")return gem("prompts/tplvars_prompt.md",body.text,0.2);
