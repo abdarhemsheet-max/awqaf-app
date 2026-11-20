@@ -156,16 +156,19 @@ function blocksToHtml(bl){return dg(bl.map(b=>{const h=FRAG(b.html||"");
  if(b.role=="farewell")return `<p class="cx">${h}</p>`;return `<p>${h}</p>`}).join(""))}
 let last=null;
 const STATIC=/github\.io$/.test(location.hostname)||location.search.includes("static");
-const KEYN="awq_gkey",GMODEL="gemini-flash-latest";
+const KEYN="awq_gkey",GMODELS=["gemini-3-flash-preview","gemini-flash-latest","gemini-3.1-flash-lite"];
 const getKey=()=>{try{return localStorage.getItem(KEYN)||""}catch(e){return""}};
 function setKey(){const k=prompt("الصق مفتاح Gemini API (يتحفظ في هذا المتصفح فقط):",getKey());if(k===null)return false;try{localStorage.setItem(KEYN,k.trim())}catch(e){}return !!k.trim()}
 if(STATIC){const b=document.getElementById("tKey");b.style.display="";b.onclick=setKey}
 async function gem(file,user,temp){let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
- const sys=await (await fetch(file)).text();
- const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+GMODEL+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
-  body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:{temperature:temp,responseMimeType:"application/json"}})});
- if(!r.ok)throw new Error("Gemini "+r.status+": "+(await r.text()).slice(0,200));
- const j=await r.json();const t=j.candidates[0].content.parts[0].text.trim().replace(/^```(?:json)?|```$/g,"").trim();return JSON.parse(t)}
+ const sys=await (await fetch(file)).text();let err="";
+ for(const m of GMODELS){
+  try{const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
+   body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:{temperature:temp,responseMimeType:"application/json"}})});
+   if(!r.ok){err="Gemini "+r.status+": "+(await r.text()).slice(0,160);if(r.status==400||r.status==403)throw new Error(err);continue}
+   const j=await r.json();const t=j.candidates[0].content.parts.filter(x=>x.text).map(x=>x.text).join("").trim().replace(/^```(?:json)?|```$/g,"").trim();return JSON.parse(t)}
+  catch(e){if(/^Gemini 40[03]/.test(e.message))throw e;err=e.message}}
+ throw new Error(err||"تعذر الاتصال")}
 async function api(path,body){
  if(STATIC){if(path=="/api/compose")return gem("prompts/system_prompt.md",body.text,0.4);
   return gem("prompts/edit_prompt.md",["السياق (المراسلة كاملة):",body.context,"","الجزء المطلوب تعديله:",body.selection,"","الطلب: "+body.request].join(String.fromCharCode(10)),0.5)}

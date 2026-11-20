@@ -8,7 +8,7 @@ app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
+MODEL = os.environ.get("GEMINI_MODEL", "gemini-3-flash-preview")
 PASSWORD = os.environ.get("APP_PASSWORD", "")
 MOCK = os.environ.get("MOCK") == "1"
 
