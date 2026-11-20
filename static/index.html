@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="مراسلات الأوقاف"><meta name="theme-color" content="#14352a">
 <title>منشئ مراسلات الأوقاف</title>
 <style>
 @font-face{font-family:"Amiri";src:url(static/fonts/Amiri-Regular.ttf);font-weight:400}
@@ -33,8 +34,8 @@ body{margin:0;font-family:"Tajawal","Noto Naskh Arabic",sans-serif;background:va
 .sec h3{margin:0 0 10px;font-size:15.5px;font-weight:700;color:var(--g);display:flex;gap:8px;align-items:center}
 .sec h3 i{background:linear-gradient(135deg,var(--g2),var(--g));color:#fff;border-radius:50%;width:24px;height:24px;font-style:normal;font-size:13px;display:grid;place-items:center;box-shadow:0 2px 6px #1f6b4f55}
 label{display:block;font-size:12.5px;font-weight:500;color:var(--mut);margin:10px 0 4px}
-input[type=text],select,textarea{width:100%;font:inherit;font-size:14.5px;padding:10px 12px;border:1px solid #cdd5ce;border-radius:11px;background:#fcfdfc;color:var(--ink);transition:.15s}
-input[type=text]:focus,select:focus,textarea:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px #1f6b4f24;background:#fff}
+input[type=password],input[type=text],select,textarea{width:100%;font:inherit;font-size:14.5px;padding:10px 12px;border:1px solid #cdd5ce;border-radius:11px;background:#fcfdfc;color:var(--ink);transition:.15s}
+input[type=password]:focus,input[type=text]:focus,select:focus,textarea:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px #1f6b4f24;background:#fff}
 textarea{min-height:80px;resize:vertical;line-height:1.8}
 input[type=range]{accent-color:var(--g2)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -54,7 +55,11 @@ details.sec>summary{cursor:pointer;font-weight:700;color:var(--g);font-size:15.5
 details.sec>summary::-webkit-details-marker{display:none}details.sec>summary small{font-weight:400;color:var(--mut);font-size:12px}
 details.sec[open]>summary{margin-bottom:6px}
 details.sec .sub{margin:14px 0 6px;font-size:14px;color:var(--g);border-bottom:1px solid var(--bd);padding-bottom:4px}details.sec .sub:first-of-type{margin-top:4px}
-.btn.rec{background:linear-gradient(135deg,#d93025,#a50e0e)!important;color:#fff!important;animation:pulse 1.2s infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px #d9302533}}.btn.wa{background:linear-gradient(135deg,#2bc16b,#128c4a);color:#fff}.btn.gold{background:linear-gradient(135deg,#d1a444,var(--gold));color:#2b1f06}
+.modal{position:fixed;inset:0;background:#0008;display:grid;place-items:center;z-index:60;padding:16px}
+.mbox{background:#fff;border-radius:18px;padding:18px;width:100%;max-width:430px;max-height:92vh;overflow:auto;box-shadow:0 20px 60px #0006}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:9px;border:1px solid #cdd5ce;background:#fff;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}
+.seg button.on{background:var(--g);color:#fff;border-color:var(--g)}
+#tReload{font-weight:700!important}.btn.rec{background:linear-gradient(135deg,#d93025,#a50e0e)!important;color:#fff!important;animation:pulse 1.2s infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px #d9302533}}.btn.wa{background:linear-gradient(135deg,#2bc16b,#128c4a);color:#fff}.btn.gold{background:linear-gradient(135deg,#d1a444,var(--gold));color:#2b1f06}
 #gen{padding:13px 16px;font-size:16.5px;letter-spacing:.2px}
 #mic{padding:13px 14px}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -135,7 +140,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
 </style>
 </head>
 <body>
-<div class="top"><h1><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#b98a2e"/><path d="M10 8h10l5 5v13H10z" fill="#fff"/><path d="M20 8v5h5" fill="#e9d6a3"/><path d="M13 17h9M13 20.5h9M13 24h6" stroke="#14352a" stroke-width="1.6" stroke-linecap="round"/></svg>منشئ مراسلات الأوقاف<small>مكتب أوقاف القره بوللي</small></h1><button class="on" id="tNew">مراسلة جديدة</button><button id="tArc">الأرشيف</button><button id="tKey" style="display:none">🔑 مفتاح Gemini</button><span id="cnt" style="margin-inline-start:auto;font-size:12px;opacity:.85"></span></div>
+<div class="top"><h1><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#b98a2e"/><path d="M10 8h10l5 5v13H10z" fill="#fff"/><path d="M20 8v5h5" fill="#e9d6a3"/><path d="M13 17h9M13 20.5h9M13 24h6" stroke="#14352a" stroke-width="1.6" stroke-linecap="round"/></svg>منشئ مراسلات الأوقاف<small>مكتب أوقاف القره بوللي</small></h1><button class="on" id="tNew">مراسلة جديدة</button><button id="tArc">الأرشيف</button><button id="tKey" style="display:none">🔑 مفتاح Gemini</button><button id="tReload" title="تحديث الصفحة" aria-label="تحديث الصفحة">↻ تحديث</button><span id="cnt" style="margin-inline-start:auto;font-size:12px;opacity:.85"></span></div>
 <div class="main" id="mainView">
 <aside class="side">
  <div class="sec"><h3><i>1</i>قول شن تبي</h3>
@@ -168,6 +173,8 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
   <label>هامش الجانبين: <span id="mrv">25</span> مم</label><input type="range" id="mr" min="10" max="40" step="1" value="25" style="width:100%">
   <label class="ck"><input type="checkbox" id="just" checked> ضبط النص (محاذاة الطرفين)</label>
   <div class="row"><button class="btn alt" id="advReset">إعادة الضبط للورقة الأصلية</button></div>
+  <h4 class="sub" id="mdlH">🤖 المفاتيح والموديل</h4>
+  <div class="row" id="mdlRow" style="margin-top:0"><button class="btn alt" id="mdlBtn" style="flex:1">🔑 مفتاح Gemini أو Claude + الموديل</button></div>
   <div class="hint">الورقة المطبوعة مسبقاً لها هوامش ثابتة (فوق 50، تحت 22، جانبين 25 مم). غيّرها للضرورة فقط.</div>
  </details>
  <div class="sec"><h3><i>3</i>صورة إلى والتوقيع</h3>
@@ -196,6 +203,16 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
 <div class="pop" id="pop"><div style="font-size:12px;color:#555">الجزء المحدد: <b id="popSel"></b></div>
  <div class="chips" id="popChips"><span class="chip">اختصر</span><span class="chip">أقوى</span><span class="chip">أبسط</span><span class="chip">أرسمي أكثر</span></div>
  <input type="text" id="popIn" placeholder="أو اكتب شن تبي تتغير…"><div class="row"><button class="btn" id="popGo">طبّق</button><button class="btn alt" id="popX">إلغاء</button></div></div>
+<div class="modal hid" id="keyModal"><div class="mbox">
+ <h3 style="margin:0 0 8px;color:var(--g)">🔑 المفاتيح والموديل</h3>
+ <label>المزوّد (اللي يكتب المراسلات)</label>
+ <div class="seg"><button id="pvG" type="button">Gemini</button><button id="pvC" type="button">Claude</button></div>
+ <label>مفتاح Gemini API</label><input type="password" id="kG" autocomplete="off" placeholder="AIza… (فاضي = المفتاح الافتراضي للموقع)">
+ <label>مفتاح Claude API</label><input type="password" id="kC" autocomplete="off" placeholder="sk-ant-…">
+ <label>الموديل</label><select id="mSel"></select>
+ <div class="hint">المفاتيح تتحفظ في هذا المتصفح فقط. كتابة الصوت (تكلم) تحتاج مفتاح Gemini دايماً. Claude للمراسلات والجداول وتعديل الأجزاء.</div>
+ <div class="row"><button class="btn" id="kSave" style="flex:1" type="button">حفظ</button><button class="btn alt" id="kCancel" type="button">إغلاق</button><button class="btn alt" id="kClear" type="button">مسح مفاتيحي</button></div>
+</div></div>
 <div class="toast" id="toast"></div>
 
 <script src="static/vendor/html2canvas.min.js"></script>
@@ -225,16 +242,55 @@ const STATIC=/github\.io$/.test(location.hostname)||location.search.includes("st
 const KEYN="awq_gkey",GMODELS=["gemini-3-flash-preview","gemini-flash-latest","gemini-3.1-flash-lite"];
 const EMBED_KEY="__GEMINI_KEY__";
 const getKey=()=>{let k="";try{k=localStorage.getItem(KEYN)||""}catch(e){}return k||(EMBED_KEY.startsWith("__")?"":EMBED_KEY)};
-function setKey(){const k=prompt("الصق مفتاح Gemini API (يتحفظ في هذا المتصفح فقط):",getKey());if(k===null)return false;try{localStorage.setItem(KEYN,k.trim())}catch(e){}return !!k.trim()}
-if(STATIC){const b=document.getElementById("tKey");b.style.display="";b.onclick=setKey}
+const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const getProv=()=>lsGet("awq_prov")==="claude"?"claude":"gemini",getCKey=()=>lsGet("awq_ckey");
+const GMODEL_OPTS=[["","تلقائي (الأسرع، مع بدائل)"],["gemini-3-flash-preview","gemini-3-flash-preview (سريع)"],["gemini-flash-latest","gemini-flash-latest (الأحدث)"],["gemini-3.1-flash-lite","gemini-3.1-flash-lite (خفيف)"],["gemini-3.5-flash","gemini-3.5-flash (أدق، أبطأ)"]];
+const CAUTO=["claude-sonnet-5-5","claude-haiku-5-5"];
+const CMODEL_OPTS=[["","تلقائي (Sonnet 5.5 ثم Haiku 5.5)"],["claude-sonnet-5-5","Claude Sonnet 5.5 (متوازن)"],["claude-haiku-5-5","Claude Haiku 5.5 (سريع)"],["claude-opus-5-5","Claude Opus 5.5 (الأقوى)"]];
+function provUI(p){$("#pvG").classList.toggle("on",p==="gemini");$("#pvC").classList.toggle("on",p==="claude");
+ $("#mSel").innerHTML=(p==="claude"?CMODEL_OPTS:GMODEL_OPTS).map(([v,t])=>`<option value="${v}">${t}</option>`).join("");$("#mSel").value=lsGet(p==="claude"?"awq_cmodel":"awq_model");$("#keyModal").dataset.p=p}
+function openKeys(){$("#kG").value=lsGet("awq_gkey");$("#kC").value=getCKey();provUI(getProv());$("#keyModal").classList.remove("hid")}
+function setKey(){openKeys();return false}
+function updProv(){const b=$("#tKey");if(b)b.textContent="🔑 "+(getProv()==="claude"?"Claude":"Gemini")}
+$("#pvG").onclick=()=>provUI("gemini");$("#pvC").onclick=()=>provUI("claude");
+$("#kSave").onclick=()=>{const p=$("#keyModal").dataset.p||"gemini";lsSet("awq_gkey",$("#kG").value.trim());lsSet("awq_ckey",$("#kC").value.trim());
+ if(p==="claude"&&!$("#kC").value.trim())return toast("ضع مفتاح Claude أولاً");
+ lsSet("awq_prov",p);lsSet(p==="claude"?"awq_cmodel":"awq_model",$("#mSel").value);$("#keyModal").classList.add("hid");updProv();toast("تم: "+(p==="claude"?"Claude":"Gemini"))};
+$("#kCancel").onclick=()=>$("#keyModal").classList.add("hid");
+$("#keyModal").addEventListener("click",e=>{if(e.target.id==="keyModal")$("#keyModal").classList.add("hid")});
+$("#kClear").onclick=()=>{["awq_gkey","awq_ckey"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});$("#kG").value="";$("#kC").value="";toast("مسحت المفاتيح المحفوظة")};
+$("#mdlBtn").onclick=openKeys;updProv();
+async function claudeGem(file,user){const key=getCKey();if(!key){openKeys();throw new Error("ضع مفتاح Claude أولاً")}
+ const sys=await (await fetch(file)).text(),sel=lsGet("awq_cmodel"),ms=sel?[sel,...CAUTO.filter(m=>m!==sel)]:CAUTO;let err="";
+ for(const m of ms){
+  try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+   body:JSON.stringify({model:m,max_tokens:4096,system:sys,messages:[{role:"user",content:user}]})});
+   if(!r.ok){const tx=await r.text();err=r.status==429?"⏳ Claude وصل حد الاستعمال، استنى شوية":"Claude "+r.status+": "+tx.slice(0,160);
+    if(r.status==401)throw new Error("مفتاح Claude غير صحيح");if(r.status==403||r.status==400)throw new Error(err);continue}
+   const j=await r.json(),t=(j.content||[]).filter(x=>x.type==="text").map(x=>x.text).join("").trim(),mm=t.match(/\{[\s\S]*\}/);if(!mm)throw new Error("رد غير صالح من Claude");
+   const out=JSON.parse(mm[0]);cntAdd();return out}
+  catch(e){if(/^مفتاح Claude|^Claude 40[03]/.test(e.message))throw e;err=e.message}}
+ throw new Error(err||"تعذر الاتصال بـ Claude")}
+if(STATIC){const b=document.getElementById("tKey");b.style.display="";b.onclick=setKey}else{const h=document.getElementById("mdlH");if(h){h.style.display="none";document.getElementById("mdlRow").style.display="none"}}
 const dayK=()=>"awq_cnt_"+new Date().toISOString().slice(0,10);
 function cntShow(){let n=0;try{n=+localStorage.getItem(dayK())||0}catch(e){}const c=document.getElementById("cnt");if(c)c.textContent="طلبات اليوم: "+n}
 function cntAdd(){try{localStorage.setItem(dayK(),(+localStorage.getItem(dayK())||0)+1)}catch(e){}cntShow()}
 cntShow();
 function quotaMsg(txt){return /PerDay|per day|daily/i.test(txt)?"⛔ وصل مفتاح Gemini للحد اليومي المجاني. جرّب بكرة أو استعمل مفتاح آخر (🔑).":"⏳ المفتاح وصل حد الاستعمال في الدقيقة. استنى دقيقة وأعد المحاولة."}
-async function gem(file,user,temp){let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
+const getSel=()=>{try{return localStorage.getItem("awq_model")||""}catch(e){return""}};
+const modelList=()=>{const x=getSel();return x?[x,...GMODELS.filter(m=>m!==x)]:GMODELS};
+async function gemRaw(parts,temp){let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
+ let err="",q429="";
+ for(const m of modelList()){
+  try{const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
+   body:JSON.stringify({contents:[{role:"user",parts}],generationConfig:{temperature:temp}})});
+   if(!r.ok){const tx=await r.text();err="Gemini "+r.status+": "+tx.slice(0,160);if(r.status==429){q429=tx;continue}if(r.status==400||r.status==403)throw new Error(err);continue}
+   const j=await r.json(),out=j.candidates[0].content.parts.filter(x=>x.text).map(x=>x.text).join("").trim();cntAdd();return out}
+  catch(e){if(/^Gemini 40[03]/.test(e.message))throw e;err=e.message}}
+ if(q429)throw new Error(quotaMsg(q429));throw new Error(err||"تعذر الاتصال")}
+async function gem(file,user,temp){if(getProv()==="claude")return claudeGem(file,user);let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
  const sys=await (await fetch(file)).text();let err="",q429="";
- for(const m of GMODELS){
+ for(const m of modelList()){
   try{const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
    body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:{temperature:temp,responseMimeType:"application/json"}})});
    if(!r.ok){const tx=await r.text();err="Gemini "+r.status+": "+tx.slice(0,160);if(r.status==429){q429=q429.includes("PerDay")?q429:tx;continue}if(r.status==400||r.status==403)throw new Error(err);continue}
@@ -275,7 +331,7 @@ let REC=null,RECON=false,baseTxt="",micLi=0;const MICL=["ar-LY","ar-SA"];
 function setMic(on){const b=$("#mic");b.classList.toggle("rec",on);b.innerHTML=on?"⏹ إيقاف":"🎙 تكلم"}
 function micStop(){RECON=false;try{REC&&REC.stop()}catch(e){}setMic(false)}
 const MICERR={"not-allowed":"المايك ممنوع: اسمح للموقع باستعمال الميكروفون من أيقونة القفل جنب الرابط","service-not-allowed":"المتصفح منع خدمة الصوت، جرّب Chrome","no-speech":"ما سمعتش صوت، اضغط وأعد المحاولة","audio-capture":"ما لقيتش ميكروفون في الجهاز","network":"الصوت يحتاج اتصال إنترنت"};
-$("#mic").onclick=()=>{
+function micSR(){
  const R=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!R)return toast("هذا المتصفح ما يدعم الصوت. استعمل Chrome، أو زر المايك في لوحة مفاتيح الجوال");
  if(RECON)return micStop();
@@ -290,7 +346,32 @@ $("#mic").onclick=()=>{
    RECON=false;setMic(false);toast(MICERR[e.error]||"تعذر الميكروفون: "+e.error)};
   r.onend=()=>{if(r!==REC)return;if(RECON){baseTxt=t.value.trim();try{start()}catch(x){RECON=false;setMic(false)}}else setMic(false)};
   try{r.start()}catch(x){RECON=false;setMic(false);toast("تعذر تشغيل المايك")}};
- start()};
+ start()}
+const TXPROMPT="فرّغ هذا التسجيل الصوتي إلى نص عربي مكتوب. المتحدث ليبي يتكلم بلهجته المحلية. اكتب ما قيل بدقة وبإملاء سليم وعلامات ترقيم بسيطة، دون أي تعليق أو شرح أو مقدمة. الأسماء والأرقام كما قيلت. إن لم يكن في التسجيل كلام واضح فأعد نصاً فارغاً.";
+let MR=null,MCH=[],MST=null,mtimer=null;
+const canRec=()=>!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder);
+function recMime(){for(const m of ["audio/webm;codecs=opus","audio/mp4","audio/webm","audio/ogg;codecs=opus"]){try{if(MediaRecorder.isTypeSupported(m))return m}catch(e){}}return""}
+async function transcribe(blob,type){
+ const b64=await new Promise((res,rej)=>{const f=new FileReader();f.onload=()=>res(String(f.result).split(",")[1]);f.onerror=rej;f.readAsDataURL(blob)});
+ if(!STATIC){const r=await fetch("/api/transcribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({audio:b64,mime:type})});
+  if(r.status==401){location.href="/login";throw new Error("login")}const j=await r.json();if(!r.ok)throw new Error(j.error||"خطأ");return(j.text||"").trim()}
+ return gemRaw([{text:TXPROMPT},{inlineData:{mimeType:type,data:b64}}],0)}
+async function micRec(){
+ try{MST=await navigator.mediaDevices.getUserMedia({audio:true})}
+ catch(e){return toast(e&&e.name==="NotAllowedError"?"المايك ممنوع: فعّله للموقع من إعدادات الجهاز (آيفون: الإعدادات ← Safari ← الميكروفون)":"ما لقيتش ميكروفون")}
+ MCH=[];const mt=recMime();let rec;try{rec=mt?new MediaRecorder(MST,{mimeType:mt}):new MediaRecorder(MST)}catch(e){MST.getTracks().forEach(t=>t.stop());return micSR()}
+ MR=rec;rec.ondataavailable=e=>{if(e.data&&e.data.size)MCH.push(e.data)};
+ rec.onstop=async()=>{clearTimeout(mtimer);MST.getTracks().forEach(t=>t.stop());const type=(rec.mimeType||mt||"audio/mp4").split(";")[0],blob=new Blob(MCH,{type});MR=null;
+  if(blob.size<1500){setMic(false);return toast("التسجيل فاضي، أعد المحاولة")}
+  const b=$("#mic");b.classList.remove("rec");b.disabled=true;b.innerHTML='<span class="spin">⟳</span> يكتب…';
+  try{const tx=await transcribe(blob,type),t=$("#topic");if(tx){t.value=(t.value.trim()?t.value.trim()+" ":"")+tx;t.focus();toast("تمت الكتابة، راجع النص واضغط حلل وصيغ")}else toast("ما سمعتش كلام واضح")}
+  catch(e){toast("تعذر: "+e.message)}
+  b.disabled=false;setMic(false)};
+ rec.start();setMic(true);toast("تكلم الحين… واضغط «إيقاف» لما تخلص");
+ mtimer=setTimeout(()=>{if(MR&&MR.state==="recording")MR.stop()},120000)}
+$("#mic").onclick=()=>{if(MR&&MR.state==="recording")return MR.stop();if(RECON)return micStop();if(canRec()&&(getKey()||!STATIC))return micRec();micSR()};
+$("#tReload").onclick=()=>{try{const u=new URL(location.href);u.searchParams.set("_r",Date.now());location.replace(u.toString())}catch(e){location.reload()}};
+try{if(/[?&]_r=/.test(location.search)){const u=new URL(location.href);u.searchParams.delete("_r");history.replaceState(null,"",u.pathname+(u.search||"")+u.hash)}}catch(e){}
 let CCH="",N1="",N2="";
 function drawBottom(){
  const d=new Date(),ds=`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")}`;

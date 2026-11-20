@@ -122,6 +122,33 @@ def table():
     except Exception as e:
         return jsonify(error=str(e)), 500
 
+TX_PROMPT = ("فرّغ هذا التسجيل الصوتي إلى نص عربي مكتوب. المتحدث ليبي يتكلم بلهجته المحلية. "
+             "اكتب ما قيل بدقة وبإملاء سليم وعلامات ترقيم بسيطة، دون أي تعليق أو شرح أو مقدمة. "
+             "الأسماء والأرقام كما قيلت. إن لم يكن في التسجيل كلام واضح فأعد نصاً فارغاً.")
+
+@app.post("/api/transcribe")
+@need_login
+def transcribe():
+    d = request.json or {}
+    audio, mime = d.get("audio", ""), d.get("mime", "audio/webm")
+    if not audio:
+        return jsonify(error="التسجيل فاضي"), 400
+    if MOCK:
+        return jsonify(text="نبي نكلف محمد لطرش يغطي زيارة رئيس الهيئة")
+    if not GEMINI_KEY:
+        return jsonify(error="GEMINI_API_KEY غير مضبوط"), 500
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
+        body = {"contents": [{"role": "user", "parts": [{"text": TX_PROMPT}, {"inlineData": {"mimeType": mime, "data": audio}}]}],
+                "generationConfig": {"temperature": 0}}
+        r = requests.post(url, params={"key": GEMINI_KEY}, json=body, timeout=100)
+        if r.status_code != 200:
+            raise RuntimeError(f"Gemini {r.status_code}: {r.text[:300]}")
+        parts = r.json()["candidates"][0]["content"]["parts"]
+        return jsonify(text="".join(p.get("text", "") for p in parts).strip())
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
 @app.get("/health")
 def health():
     return "ok"
