@@ -317,7 +317,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
   <label>الهامش السفلي: <span id="mbv">22</span> مم</label><input type="range" id="mb" min="10" max="40" step="1" value="22" style="width:100%">
   <label>هامش الجانبين: <span id="mrv">25</span> مم</label><input type="range" id="mr" min="10" max="40" step="1" value="25" style="width:100%">
   <label class="ck"><input type="checkbox" id="just" checked> ضبط النص (محاذاة الطرفين)</label>
-  <div class="row"><button class="btn alt" id="advReset">إعادة الضبط للورقة الأصلية</button></div>
+  <div class="row"><button class="btn prefSave" type="button">💾 احفظ</button><button class="btn alt" id="advReset">إعادة الضبط للورقة الأصلية</button></div>
   <h4 class="sub" id="mdlH">🤖 المفاتيح والموديل</h4>
   <div class="row" id="mdlRow" style="margin-top:0"><button class="btn alt" id="mdlBtn" style="flex:1">🔑 مفتاح Gemini أو Claude + الموديل</button></div>
   <div class="hint">الورقة المطبوعة مسبقاً لها هوامش ثابتة (فوق 50، تحت 22، جانبين 25 مم). غيّرها للضرورة فقط.</div>
@@ -328,6 +328,9 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
   <div style="display:flex;gap:6px;margin-top:6px"><input type="text" id="ccNew" placeholder="جهة أخرى: مثال قسم المراجعة"><button class="btn alt" id="ccAdd" style="padding:6px 12px">+ إضافة</button></div>
   <label>الاسم</label><input type="text" id="sn" value="عبدالرحيم أحمد شيتة">
   <label>المسمى</label><input type="text" id="st" value="رئيس قسم الإعلام">
+  <label>كاتب الورقة (يظهر أسفل «صورة إلى»)</label><input type="text" id="sw" value="شيتة">
+  <div class="row"><button class="btn prefSave" type="button" style="flex:1">💾 احفظ إعداداتي</button><button class="btn alt" id="prefReset" type="button">↺ الأصل</button></div>
+  <div class="hint">يحفظ في هذا الجهاز: حجم الخط والتباعد والخصائص المتقدمة والاسم والمسمى وكاتب الورقة وقائمة «صورة إلى». ويرجعون تلقائياً كل ما تفتح النظام. (الخط والتباعد والخصائص والاسم تنحفظ تلقائياً أيضاً.)</div>
  </div>
  <div class="sec"><h3><i>4</i>إخراج</h3>
   <div class="row" style="margin-top:0"><button class="btn gold" id="pdf" style="flex:1">⬇ تنزيل PDF</button><button class="btn wa" id="wa" style="flex:1">➤ إرسال واتساب</button></div>
@@ -576,16 +579,17 @@ $("#mic").onclick=()=>{if(MR&&MR.state==="recording")return MR.stop();if(RECON)r
 $("#tReload").onclick=()=>{try{const u=new URL(location.href);u.searchParams.set("_r",Date.now());location.replace(u.toString())}catch(e){location.reload()}};
 try{if(/[?&]_r=/.test(location.search)){const u=new URL(location.href);u.searchParams.delete("_r");history.replaceState(null,"",u.pathname+(u.search||"")+u.hash)}}catch(e){}
 let CCH="",N1="",N2="";
+function escH(t){return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
 function drawBottom(){
  const d=new Date(),ds=`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")}`;
- CCH=`<div class="h">صـــورة إلـــى :-</div>`+cc.map(c=>`<div class="i">${DOC} ${c}.</div>`).join("")+`<div class="typ"><span style="font-size:10pt">✍</span>${KB} شيتة &nbsp;&nbsp; <span dir="ltr" class="n">${ds}</span>م</div>`;
+ CCH=`<div class="h">صـــورة إلـــى :-</div>`+cc.map(c=>`<div class="i">${DOC} ${c}.</div>`).join("")+`<div class="typ"><span style="font-size:10pt">✍</span>${KB} ${escH($("#sw")?$("#sw").value.trim():"شيتة")} &nbsp;&nbsp; <span dir="ltr" class="n">${ds}</span>م</div>`;
  N1=$("#sn").value;N2=$("#st").value;layoutAll()}
 function renderCks(){$("#cks").innerHTML=CC.map(c=>`<label class="ck"><input type="checkbox" value="${c}" ${cc.includes(c)?"checked":""}>${c}</label>`).join("");
  $$("#cks input").forEach(i=>i.onchange=()=>{cc=CC.filter(x=>$$("#cks input:checked").some(y=>y.value==x));drawBottom()})}
 renderCks();
-$("#ccAdd").onclick=()=>{const v=$("#ccNew").value.trim().replace(/[.،]+$/,"");if(!v)return toast("اكتب اسم الجهة");if(!CC.includes(v))CC.push(v);if(!cc.includes(v))cc.push(v);$("#ccNew").value="";renderCks();drawBottom()};
+$("#ccAdd").onclick=()=>{const v=$("#ccNew").value.trim().replace(/[.،]+$/,"");if(!v)return toast("اكتب اسم الجهة");if(!CC.includes(v))CC.push(v);if(!cc.includes(v))cc.push(v);$("#ccNew").value="";renderCks();drawBottom();autoSave()};
 $("#ccNew").addEventListener("keydown",e=>{if(e.key=="Enter")$("#ccAdd").click()});
-$("#sn").oninput=$("#st").oninput=drawBottom;
+$("#sn").oninput=$("#st").oninput=$("#sw").oninput=()=>{drawBottom();autoSave()};
 
 
 const PXMM=3.7795,pagesEl=$("#pages");let sigChoice="last",PN=1,sigAt=0;
@@ -633,13 +637,13 @@ function scale(){const st=$(".stage"),w=st.clientWidth-36,s=Math.min(1,w/(210*PX
 function setBody(h){pagesEl.innerHTML="";const p=mkPage(0);pagesEl.appendChild(p);p.querySelector(".body").innerHTML=h;layoutAll()}
 function getBody(){return $$(".body").map(b=>b.innerHTML).join("")}
 function setLH(v){pagesEl.style.setProperty("--lh",v);$("#lh").value=v;$("#lhv").textContent=(+v).toFixed(2);rangeFill()}
-$("#lh").oninput=e=>{setLH(e.target.value);layoutAll()};
+$("#lh").oninput=e=>{setLH(e.target.value);layoutAll();autoSave()};
 $("#sigSel").onchange=e=>{sigChoice=e.target.value;layoutAll()};
 let QUIET=true;const FSP={prev:{lh:2,min:1.5},big:{lh:1.6,min:1.4}};let FSK="prev";
-function setFS(k){FSK=k;if(typeof ADV!=="undefined"&&ADV.fs!=null){ADV.fs=null;try{localStorage.setItem("awq_adv",JSON.stringify(ADV))}catch(e){}["--fs","--fs2","--fs3"].forEach(x=>pagesEl.style.removeProperty(x));if(typeof advUI==="function")advUI()}$("#wrap").classList.toggle("big",k==="big");$("#fs").value=k;try{localStorage.setItem("awq_fs",k)}catch(e){}}
+function setFS(k){FSK=k;if(typeof ADV!=="undefined"&&ADV.fs!=null){ADV.fs=null;try{localStorage.setItem("awq_adv",JSON.stringify(ADV))}catch(e){}["--fs","--fs2","--fs3"].forEach(x=>pagesEl.style.removeProperty(x));if(typeof advUI==="function")advUI()}$("#wrap").classList.toggle("big",k==="big");$("#fs").value=k;autoSave()}
 $("#fs").onchange=e=>{setFS(e.target.value);$("#fit").click()};
-$("#fit").onclick=()=>{const P=FSP[FSK];setLH(P.lh);layoutAll();if(PN>1){for(let v=P.lh-.05;v>=P.min-.001;v-=.05){setLH(v.toFixed(2));layoutAll();if(PN===1)break}
- if(PN>1){setLH(P.lh);layoutAll();toast("النص أطول من صفحة، انتقل للصفحة الثانية")}}else if(!QUIET)toast("صفحة واحدة بتباعد "+P.lh.toFixed(2))};
+$("#fit").onclick=()=>{const P=FSP[FSK],B=(INITLH!=null&&INITFSK===FSK)?INITLH:P.lh;INITLH=null;setLH(B);layoutAll();if(PN>1){for(let v=B-.05;v>=P.min-.001;v-=.05){setLH(v.toFixed(2));layoutAll();if(PN===1)break}
+ if(PN>1){setLH(B);layoutAll();toast("النص أطول من صفحة، انتقل للصفحة الثانية")}}else if(!QUIET)toast("صفحة واحدة بتباعد "+B.toFixed(2))};
 $("#bB").onclick=()=>document.execCommand("bold");
 $("#bC").onclick=()=>document.execCommand("justifyCenter");
 $("#bU").onclick=()=>document.execCommand("undo");
@@ -731,7 +735,7 @@ function advApply(save){const st=pagesEl.style;
  st.setProperty("--pgap",ADV.gap+"mm");st.setProperty("--mt",ADV.mt+"mm");st.setProperty("--mb",ADV.mb+"mm");st.setProperty("--mr",ADV.mr+"mm");
  if(ADV.fs==null){["--fs","--fs2","--fs3"].forEach(k=>st.removeProperty(k))}else{st.setProperty("--fs",ADV.fs+"pt");st.setProperty("--fs2",(ADV.fs+1.5)+"pt");st.setProperty("--fs3",(ADV.fs+2)+"pt")}
  $("#wrap").classList.toggle("ragged",!ADV.just);advUI();layoutAll();
- if(save){try{localStorage.setItem("awq_adv",JSON.stringify(ADV))}catch(e){}}}
+ if(save)autoSave()}
 $("#fsz").oninput=e=>{ADV.fs=+e.target.value;advApply(true)};
 [["gap","gap"],["mt","mt"],["mb","mb"],["mr","mr"]].forEach(([id,k])=>{$("#"+id).oninput=e=>{ADV[k]=+e.target.value;advApply(true)}});
 $("#just").onchange=e=>{ADV.just=e.target.checked;advApply(true)};
@@ -819,8 +823,28 @@ document.addEventListener("input",e=>{if(e.target&&e.target.type==="range")range
 $("#mbW").onclick=()=>{view(1);setTimeout(()=>$(".side").scrollIntoView({behavior:"smooth",block:"start"}),60)};
 $("#mbP").onclick=()=>{view(1);setTimeout(()=>$(".stage").scrollIntoView({behavior:"smooth",block:"start"}),60)};
 $("#mbD").onclick=()=>$("#pdf").click();$("#mbS").onclick=()=>$("#wa").click();
-try{const k=localStorage.getItem("awq_fs");if(k&&FSP[k])setFS(k)}catch(e){}
-try{const a=JSON.parse(localStorage.getItem("awq_adv")||"null");if(a)ADV={...ADVD,...a}}catch(e){}advUI();if(JSON.stringify(ADV)!==JSON.stringify(ADVD))advApply(false);
+const PD={sn:"عبدالرحيم أحمد شيتة",st:"رئيس قسم الإعلام",sw:"شيتة"},CC0=[...CC],CCSEL0=[...cc];
+let PREF_READY=false,INITLH=null,INITFSK=null,prefTm=null;
+function prefsGet(){try{return JSON.parse(localStorage.getItem("awq_prefs")||"null")}catch(e){return null}}
+function prefsSnapshot(full){const old=prefsGet()||{};return {v:1,fsk:FSK,lh:+$("#lh").value,adv:ADV,sn:$("#sn").value,st:$("#st").value,sw:$("#sw").value,CC:[...CC],cc:full?[...cc]:old.cc}}
+function savePrefs(full){try{localStorage.setItem("awq_prefs",JSON.stringify(prefsSnapshot(full)))}catch(e){return false}return true}
+function autoSave(){if(!PREF_READY)return;clearTimeout(prefTm);prefTm=setTimeout(()=>savePrefs(false),300)}
+function prefsApply(P){if(!P)return;
+ if(P.fsk&&FSP[P.fsk])setFS(P.fsk);
+ if(P.adv&&typeof P.adv==="object")ADV={...ADVD,...P.adv};
+ if(typeof P.sn==="string")$("#sn").value=P.sn;if(typeof P.st==="string")$("#st").value=P.st;if(typeof P.sw==="string")$("#sw").value=P.sw;
+ if(Array.isArray(P.CC))P.CC.forEach(c=>{if(typeof c==="string"&&!CC.includes(c))CC.push(c)});
+ if(Array.isArray(P.cc)&&P.cc.length){P.cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});cc=CC.filter(c=>P.cc.includes(c))}
+ INITLH=(P.lh>=1.3&&P.lh<=2)?+P.lh:null;INITFSK=P.fsk||FSK;
+ advUI();advApply(false);renderCks();drawBottom()}
+$$(".prefSave").forEach(b=>b.onclick=()=>{toast(savePrefs(true)?"تم الحفظ: الخط، التباعد، الخصائص، الاسم والمسمى، كاتب الورقة، صورة إلى":"تعذر الحفظ في المتصفح")});
+$("#prefReset").onclick=()=>{if(!confirm("إرجاع كل الإعدادات (الخط، الخصائص، الاسم والمسمى، كاتب الورقة، صورة إلى) للأصل؟"))return;
+ PREF_READY=false;["awq_prefs","awq_adv","awq_fs"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+ ADV={...ADVD};setFS("prev");$("#sn").value=PD.sn;$("#st").value=PD.st;$("#sw").value=PD.sw;CC.splice(0,CC.length,...CC0);cc=[...CCSEL0];
+ advApply(false);renderCks();drawBottom();$("#fit").click();PREF_READY=true;toast("رجعت الإعدادات الأصلية")};
+let P0=prefsGet();
+if(!P0){try{const k=localStorage.getItem("awq_fs"),a=JSON.parse(localStorage.getItem("awq_adv")||"null");if((k&&FSP[k])||a)P0={fsk:k&&FSP[k]?k:null,adv:a}}catch(e){}}
+prefsApply(P0);PREF_READY=true;
 document.fonts.ready.then(()=>{$("#fit").click();QUIET=false});
 </script>
 </body></html>
