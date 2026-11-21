@@ -421,10 +421,17 @@ textarea::-webkit-scrollbar{width:6px}textarea::-webkit-scrollbar-thumb{backgrou
 #adv .row{margin-top:8px}
 #adv textarea{min-height:60px}
 #adv .hint{margin-top:10px}
+.top>#tSync{padding:6px 10px;font-size:16px;line-height:1}
+.top>#tSync .lbl{display:none}
+@media(max-width:820px){
+ .top{grid-template-columns:minmax(0,1fr) auto auto}
+ .top>#cnt{grid-column:2;grid-row:1}.top>#tSync{grid-column:3;grid-row:1}
+}
+.stbtn{position:sticky;top:0;z-index:3;display:inline-block;vertical-align:top;margin:0 6px 10px;min-height:30px;padding:4px 12px;font-size:12px;border-radius:999px;background:#fff;box-shadow:0 2px 8px rgba(20,58,75,.2)}
 @media print{
 @page{size:A4;margin:0}
 html,body{height:auto!important;background:#fff!important;display:block!important}
-.top,.side,.stat,.toast,.pop,#arcView,#tplView,#tplBar,.modal,#mbar,#zoomBar,#mgTip,#syncModal,.mgs,.pbrk,.pn{display:none!important}
+.top,.side,.stat,.toast,.pop,#arcView,#tplView,#tplBar,.modal,#mbar,#zoomBar,#mgTip,#syncModal,.stbtn,.mgs,.pbrk,.pn{display:none!important}
 .main{display:block!important}.stage{padding:0!important;background:none!important;overflow:visible!important}
 .wrap{transform:none!important;height:auto!important;width:210mm;margin:0!important}
 .a4{box-shadow:none!important;margin:0!important;page-break-after:always;break-after:page}
@@ -434,7 +441,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
 </style>
 </head>
 <body data-v="new">
-<div class="top"><h1><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc476"/><stop offset="1" stop-color="#ee9a2c"/></linearGradient></defs><rect width="34" height="34" rx="11" fill="url(#lg)"/><path d="M10 8h10l5 5v13H10z" fill="#fff"/><path d="M20 8v5h5" fill="#fde0b8"/><path d="M13 17h9M13 20.5h9M13 24h6" stroke="#1b4b5f" stroke-width="1.6" stroke-linecap="round"/></svg>مراسلاتي<small>مكتب أوقاف القره بوللي</small></h1><nav class="tabs"><button class="on" id="tNew">مراسلة جديدة</button><button id="tTpl">مراسلات معتادة</button><button id="tArc">الأرشيف</button></nav><button id="tKey" style="display:none">🔑 مفتاح Gemini</button><button id="tSync" title="المزامنة السحابية (Supabase)" aria-label="المزامنة"><span class="ic">☁</span><span class="lbl"> غير متصل</span></button><button id="tReload" title="تحديث الصفحة" aria-label="تحديث الصفحة"><span class="ic">↻</span><span class="lbl"> تحديث</span></button><span id="cnt" style="margin-inline-start:auto;font-size:12px;opacity:.85"></span></div>
+<div class="top"><h1><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc476"/><stop offset="1" stop-color="#ee9a2c"/></linearGradient></defs><rect width="34" height="34" rx="11" fill="url(#lg)"/><path d="M10 8h10l5 5v13H10z" fill="#fff"/><path d="M20 8v5h5" fill="#fde0b8"/><path d="M13 17h9M13 20.5h9M13 24h6" stroke="#1b4b5f" stroke-width="1.6" stroke-linecap="round"/></svg>مراسلاتي<small>مكتب أوقاف القره بوللي</small></h1><nav class="tabs"><button class="on" id="tNew">مراسلة جديدة</button><button id="tTpl">مراسلات معتادة</button><button id="tArc">الأرشيف</button></nav><button id="tSync" title="حسابي (تسجيل الدخول والمزامنة)" aria-label="حسابي"><span class="ic">👤</span><span class="lbl"></span></button><span id="cnt" style="margin-inline-start:auto;font-size:12px;opacity:.85"></span></div>
 <div class="main" id="mainView">
 <aside class="side">
  <div class="sec"><h3><i>1</i>قول شن تبي</h3>
@@ -478,7 +485,8 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
   <details class="grp"><summary><span class="gi">☁</span><span class="gt"><b>الحفظ والمزامنة</b><small>حفظ إعداداتك وربط حسابك السحابي (Supabase)</small></span><span class="syncdot" id="syncDot"></span></summary>
    <div class="row" style="margin-top:6px"><button class="btn prefSave" type="button" style="flex:1">💾 احفظ إعداداتي</button><button class="btn alt" id="advReset" type="button">↺ رجّع القالب</button></div>
    <div class="hint" id="syncHint">☁ حسابك السحابي: اسمك + رمزك مرة وحدة، وكل مراسلاتك وقوالبك وإعداداتك تتزامن بين أجهزتك.</div>
-   <div class="row"><button class="btn" id="syncOpen" type="button" style="flex:1">☁ حسابي (الاسم والرمز)</button></div>
+   <div class="row"><button class="btn" id="syncOpen" type="button" style="flex:1">👤 حسابي (الاسم والرمز)</button></div>
+   <div class="row"><button class="btn alt" id="advReload" type="button" style="flex:1">↻ تحديث الصفحة (آخر نسخة)</button></div>
   </details>
   <details class="grp" id="mdlGrp"><summary id="mdlH"><span class="gi">✦</span><span class="gt"><b>الذكاء والمفاتيح</b><small>Gemini أو Groq أو Claude، والموديل</small></span></summary>
   <div class="row" id="mdlRow" style="margin-top:0"><button class="btn alt" id="mdlBtn" style="flex:1">🔑 مفتاح Gemini أو Claude + الموديل</button></div>
@@ -496,7 +504,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  </div>
  <div class="sec"><h3><i>4</i>إخراج</h3>
   <div class="row" style="margin-top:0"><button class="btn gold" id="pdf" style="flex:1">⬇ تنزيل PDF</button><button class="btn wa" id="wa" style="flex:1">➤ إرسال واتساب</button></div>
-  <div class="row"><button class="btn" id="save" style="flex:1" title="تتحفظ تلقائياً، هذا للتأكيد">💾 احفظ الآن</button><button class="btn alt" id="prt">🖨 طباعة</button><button class="btn alt" id="tplMk" style="flex:1">📌 احفظ كقالب</button></div>
+  <div class="row"><button class="btn" id="save" style="flex:1" title="المراسلة تتحفظ تلقائياً أيضاً">💾 حفظ في الأرشيف</button><button class="btn alt" id="prt">🖨 طباعة</button><button class="btn alt" id="tplMk" style="flex:1">📌 احفظ كقالب</button></div>
   <div class="hint">ينزل PDF جاهز (A4) مباشرة بدون نافذة طباعة. واتساب: في الجوال تفتح قائمة المشاركة وتختار واتساب، وفي الكمبيوتر ينزل الملف ويفتح واتساب لترفقه.</div>
  </div>
 </aside>
@@ -509,7 +517,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  <div class="r" id="varChips" style="margin-top:8px"></div>
  <div class="r"><button class="btn gold" id="tplSave" type="button" style="flex:1">✓ احفظ القالب</button><button class="btn alt" id="tplCancel" type="button">✕ إلغاء</button></div>
 </div>
-<div class="stat ok" id="stat"></div>
+<div class="stat ok" id="stat"></div><button class="btn alt stbtn" id="saveQ" type="button">💾 حفظ في الأرشيف</button>
 <div class="wrap" id="wrap"><div id="pages"></div></div></div>
 </div>
 
@@ -644,7 +652,7 @@ async function claudeGem(file,user){const key=getCKey();if(!key){openKeys();thro
    const out=JSON.parse(mm[0]);cntAdd();return out}
   catch(e){if(/^مفتاح Claude|^Claude 40[03]/.test(e.message))throw e;err=e.message}}
  throw new Error(err||"تعذر الاتصال بـ Claude")}
-if(STATIC){const b=document.getElementById("tKey");b.style.display="";b.onclick=setKey}else{const g=document.getElementById("mdlGrp");if(g)g.style.display="none"}
+if(!STATIC){const g=document.getElementById("mdlGrp");if(g)g.style.display="none"}
 const dayK=()=>"awq_cnt_"+new Date().toISOString().slice(0,10);
 function cntShow(){let n=0;try{n=+localStorage.getItem(dayK())||0}catch(e){}const c=document.getElementById("cnt");if(c)c.textContent="اليوم: "+n}
 function cntAdd(){try{localStorage.setItem(dayK(),(+localStorage.getItem(dayK())||0)+1)}catch(e){}cntShow()}
@@ -753,7 +761,7 @@ async function micRec(){
  rec.start();setMic(true);toast("تكلم الحين… واضغط «إيقاف» لما تخلص");
  mtimer=setTimeout(()=>{if(MR&&MR.state==="recording")MR.stop()},120000)}
 $("#mic").onclick=()=>{if(MR&&MR.state==="recording")return MR.stop();if(RECON)return micStop();if(canRec()&&(getKey()||getGrKey()||!STATIC))return micRec();micSR()};
-$("#tReload").onclick=()=>{try{const u=new URL(location.href);u.searchParams.set("_r",Date.now());location.replace(u.toString())}catch(e){location.reload()}};
+$("#advReload").onclick=()=>{try{const u=new URL(location.href);u.searchParams.set("_r",Date.now());location.replace(u.toString())}catch(e){location.reload()}};
 try{if(/[?&]_r=/.test(location.search)){const u=new URL(location.href);u.searchParams.delete("_r");history.replaceState(null,"",u.pathname+(u.search||"")+u.hash)}}catch(e){}
 let CCH="",N1="",N2="";
 function escH(t){return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
@@ -917,7 +925,7 @@ function arcSave(){if(ARCLOCK||$("#wrap").classList.contains("tplmode"))return f
  if(!it){it={id:now,u:now,t:ty,h,s:s2,d:new Date().toLocaleDateString("ar-LY"),cc:[...cc]};store.unshift(it);CURID=it.id;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
  if(it.h===h&&it.s===s2&&JSON.stringify(it.cc)===JSON.stringify(cc))return true;
  it.h=h;it.s=s2;it.cc=[...cc];it.t=ty;it.u=now;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
-$("#save").onclick=()=>{clearTimeout(arcTm);toast(arcSave()?"✓ محفوظة في حسابك":"ما فيه نص للحفظ")};
+$("#saveQ").onclick=()=>$("#save").click();$("#save").onclick=()=>{clearTimeout(arcTm);toast(arcSave()?"✓ محفوظة في حسابك":"ما فيه نص للحفظ")};
 function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||x.s.includes(q)||x.t.includes(q)).map(x=>`<div class="it"><input type="checkbox" data-c="${x.id}"><div class="t">${x.s||"(بدون عنوان)"}<small>${x.d}</small></div><span class="tag">${x.t}</span><div class="ib"><button class="btn alt" data-o="${x.id}">فتح</button><button class="btn alt" data-x="${x.id}">حذف</button></div></div>`).join("")||"<div style='padding:14px;color:#888'>لا توجد مراسلات محفوظة بعد.</div>";
  $$("[data-o]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.o);CURID=x.id;setBody(x.h);cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();view(1)});
  $$("[data-x]").forEach(b=>b.onclick=()=>{tomb("letter",b.dataset.x);store=store.filter(y=>y.id!=b.dataset.x);persist();list()})}
@@ -1114,7 +1122,7 @@ const SYNCCOL={
  fmt:{get:()=>fmtUserLoad(),set:a=>{fmtUserSave(a,false);fmtSelRender()}}};
 let syncTm=null;
 function syncSoon(){if(!SB.session)return;clearTimeout(syncTm);syncTm=setTimeout(()=>syncNow(false),1500)}
-function sbState(t,cls){SB.state=t;const b=$("#tSync");if(b){b.querySelector(".lbl").textContent=" "+t.replace(/^[^\s]+\s/,"");b.classList.toggle("ok",cls==="ok");b.classList.toggle("bad",cls==="bad")}
+function sbState(t,cls){SB.state=t;const b=$("#tSync");if(b){b.title="حسابي — "+t;b.classList.toggle("ok",cls==="ok");b.classList.toggle("bad",cls==="bad")}
  const d=$("#syncDot");if(d)d.className="syncdot "+(cls||"");const e=$("#sbState");if(e)e.textContent=t+(SB.last&&cls==="ok"?" — "+new Date(SB.last).toLocaleTimeString("ar-LY"):"");const h=$("#syncHint");if(h&&SB.session)h.textContent="☁ "+t+(SB.session.user&&(SB.session.user.name||SB.session.user.email)?" — "+(SB.session.user.name||SB.session.user.email):"")}
 async function syncNow(first){if(!SB.session||SB.busy||!SB.url)return;SB.busy=true;sbState("⟳ تتزامن…","busy");
  try{const rows=(await sbRest("awq_store?select=kind,id,data,updated_at,deleted"))||[];const rem={};rows.forEach(r=>{rem[r.kind+"|"+r.id]=r});
