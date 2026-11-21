@@ -36,18 +36,16 @@ python app.py               # http://localhost:5000
 - الورقة الرسمية: نص أسود فقط، والترويسة والرقم الإشاري والتاريخ تُترك فارغة. التفاصيل في `CLAUDE.md`.
 
 ## المزامنة السحابية (Supabase)
-تحفظ المراسلات (الأرشيف)، قوالب المراسلات، قوالب التنسيق، والإعدادات في حسابك وتزامنها بين الأجهزة. التطبيق يشتغل بدونها (التخزين المحلي) وهي اختيارية.
+الاستعمال: زر ☁ فوق ← اكتب **اسمك** و**رمزك** (4 خانات أو أكثر) ← دخول. أول مرة ينشئ حسابك لوحده، وبعدها نفس الاسم والرمز على أي جهاز يرجّع المراسلات والقوالب وقوالب التنسيق والإعدادات. الأسماء العربية توحَّد (تشكيل/همزة/مسافات).
 
-1. أنشئ مشروعاً مجانياً على https://supabase.com (Project name: marasilati).
-2. SQL Editor ← New query ← الصق محتوى `supabase/schema.sql` ← Run.
-3. Project Settings ← API: انسخ **Project URL** و**anon public key** (هذا المفتاح عام بطبيعته، والحماية من Row Level Security).
-4. في «مراسلاتي»: زر ☁ فوق (أو خصائص متقدمة ← الحفظ والمزامنة) ← ألصق الرابط والمفتاح ← أدخل بريدك وكلمة مرور ← «إنشاء حساب» ثم «دخول».
-5. بعد إنشاء حسابك: Authentication ← Sign In / Providers ← Email ← عطّل **Allow new users to sign up** حتى لا يُنشئ غيرك حسابات.
-6. على الجهاز الثاني: نفس الرابط والمفتاح والبريد فتنزل كل بياناتك.
+التركيب (مرة وحدة، بالـ CLI):
+```
+supabase login
+supabase projects create marasilati --org-id <ORG> --region eu-central-1 --db-password <PASS>
+supabase link --project-ref <REF> --password <PASS>
+supabase db push                         # يطبّق supabase/migrations (جدول awq_store + RLS)
+supabase functions deploy auth-name --project-ref <REF> --use-api --no-verify-jwt
+```
+ثم أضف `SUPABASE_URL` و`SUPABASE_ANON_KEY` (المفتاح العام/publishable) كـ Secrets في GitHub وشغّل Deploy ليدخلا في الصفحة. اختيارياً: `supabase secrets set AWQ_PEPPER=<نص عشوائي>`.
 
-اختياري: لإدخال الرابط والمفتاح تلقائياً في الصفحة المنشورة أضفهما كـ Secrets في GitHub باسم `SUPABASE_URL` و`SUPABASE_ANON_KEY` ثم شغّل Deploy.
-
-طريقة التزامن: التخزين المحلي أولاً ثم رفع التغييرات بعد ثانية ونصف، وآخر تعديل يفوز، والحذف يُنقل كعلامة حذف. للتجربة بدون حساب حقيقي يوجد خادم محاكاة بسيط (`supabase/mock_server.py`).
-
-### مشروعك الحالي
-تم إنشاء مشروع `marasilati` بالـ CLI وتطبيق المخطط عليه (`supabase/migrations/`). Project ref: `qpindseciwxoageaqdtf`، الرابط: `https://qpindseciwxoageaqdtf.supabase.co`. المفتاح العام (publishable) من: Project Settings ← API Keys. كلمة مرور قاعدة البيانات محفوظة محلياً في `.supabase-db-password` (خارج Git). لتطبيق تعديلات المخطط لاحقاً: `supabase db push`.
+ملاحظات: الدالة `supabase/functions/auth-name` تحوّل الاسم لبريد داخلي والرمز لكلمة مرور مشتقة (لا يُخزَّن الرمز). أي شخص يكتب اسماً جديداً ينشئ حساباً منفصلاً لا يرى بياناتك؛ استعمل رمزاً أطول من 4 خانات. المشروع الحالي: `qpindseciwxoageaqdtf`. للتجربة المحلية يوجد `supabase/mock_server.py`.
