@@ -48,3 +48,6 @@ python app.py               # http://localhost:5000
 اختياري: لإدخال الرابط والمفتاح تلقائياً في الصفحة المنشورة أضفهما كـ Secrets في GitHub باسم `SUPABASE_URL` و`SUPABASE_ANON_KEY` ثم شغّل Deploy.
 
 طريقة التزامن: التخزين المحلي أولاً ثم رفع التغييرات بعد ثانية ونصف، وآخر تعديل يفوز، والحذف يُنقل كعلامة حذف. للتجربة بدون حساب حقيقي يوجد خادم محاكاة بسيط (`supabase/mock_server.py`).
+
+### مشروعك الحالي
+تم إنشاء مشروع `marasilati` بالـ CLI وتطبيق المخطط عليه (`supabase/migrations/`). Project ref: `qpindseciwxoageaqdtf`، الرابط: `https://qpindseciwxoageaqdtf.supabase.co`. المفتاح العام (publishable) من: Project Settings ← API Keys. كلمة مرور قاعدة البيانات محفوظة محلياً في `.supabase-db-password` (خارج Git). لتطبيق تعديلات المخطط لاحقاً: `supabase db push`.

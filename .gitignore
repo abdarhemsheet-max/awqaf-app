@@ -1,3 +1,7 @@
 __pycache__/
 .env
 *.pyc
+
+.supabase-db-password
+supabase/.temp/
+supabase/.branches/
