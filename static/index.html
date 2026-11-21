@@ -477,8 +477,8 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
   </details>
   <details class="grp"><summary><span class="gi">☁</span><span class="gt"><b>الحفظ والمزامنة</b><small>حفظ إعداداتك وربط حسابك السحابي (Supabase)</small></span><span class="syncdot" id="syncDot"></span></summary>
    <div class="row" style="margin-top:6px"><button class="btn prefSave" type="button" style="flex:1">💾 احفظ إعداداتي</button><button class="btn alt" id="advReset" type="button">↺ رجّع القالب</button></div>
-   <div class="hint" id="syncHint">☁ المزامنة السحابية (Supabase) تحفظ المراسلات والقوالب والإعدادات على حسابك وتزامنها بين أجهزتك.</div>
-   <div class="row"><button class="btn" id="syncOpen" type="button" style="flex:1">☁ إعدادات المزامنة</button></div>
+   <div class="hint" id="syncHint">☁ حسابك السحابي: اسمك + رمزك مرة وحدة، وكل مراسلاتك وقوالبك وإعداداتك تتزامن بين أجهزتك.</div>
+   <div class="row"><button class="btn" id="syncOpen" type="button" style="flex:1">☁ حسابي (الاسم والرمز)</button></div>
   </details>
   <details class="grp" id="mdlGrp"><summary id="mdlH"><span class="gi">✦</span><span class="gt"><b>الذكاء والمفاتيح</b><small>Gemini أو Groq أو Claude، والموديل</small></span></summary>
   <div class="row" id="mdlRow" style="margin-top:0"><button class="btn alt" id="mdlBtn" style="flex:1">🔑 مفتاح Gemini أو Claude + الموديل</button></div>
@@ -548,15 +548,17 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
 <div class="toast" id="toast"></div>
 <nav id="mbar" aria-label="تنقل سريع"><button id="mbW" type="button"><span class="ic">✍</span>اكتب</button><button id="mbP" type="button"><span class="ic">📄</span>الورقة</button><button id="mbD" type="button" aria-label="تنزيل PDF"><span class="ic">⬇</span></button><button id="mbT" type="button"><span class="ic">📋</span>قوالب</button><button id="mbS" type="button"><span class="ic">➤</span>واتساب</button></nav>
 <div class="modal hid" id="syncModal"><div class="mbox">
- <h3 style="margin:0 0 6px">☁ المزامنة السحابية (Supabase)</h3>
- <div class="hint" style="margin-top:0">تحفظ كل المراسلات والقوالب (الرسالة وقوالب التنسيق) والإعدادات في حسابك، وتزامنها بين الجوال والكمبيوتر. الخطوات في README (قسم Supabase).</div>
- <label>رابط المشروع (Project URL)</label><input type="text" id="sbUrl" dir="ltr" placeholder="https://xxxx.supabase.co" autocomplete="off">
- <label>المفتاح العام (anon public key)</label><input type="password" id="sbKey" dir="ltr" placeholder="eyJ… أو sb_publishable_…" autocomplete="off">
- <label>البريد الإلكتروني</label><input type="text" id="sbMail" dir="ltr" placeholder="name@example.com" autocomplete="username">
- <label>كلمة المرور</label><input type="password" id="sbPass" dir="ltr" autocomplete="current-password">
- <div class="row"><button class="btn" id="sbIn" type="button" style="flex:1">دخول</button><button class="btn alt" id="sbUp" type="button" style="flex:1">إنشاء حساب</button></div>
+ <h3 style="margin:0 0 6px">☁ حسابي</h3>
+ <div class="hint" style="margin-top:0">اكتب اسمك ورمزك مرة وحدة، وكل مراسلاتك وقوالبك وإعداداتك تتحفظ وتتزامن بين أجهزتك. نفس الاسم والرمز على أي جهاز يرجّع لك بياناتك. أول مرة ينشئ لك الحساب لوحده.</div>
+ <label>الاسم</label><input type="text" id="sbName" placeholder="مثال: عبدالرحيم شيتة" autocomplete="off">
+ <label>الرمز (4 خانات أو أكثر)</label><input type="password" id="sbCode" placeholder="رمزك السري" autocomplete="off">
+ <div class="row"><button class="btn" id="sbIn" type="button" style="flex:1">دخول</button></div>
  <div class="hint" id="sbState">غير متصل</div>
- <div class="row"><button class="btn" id="sbNow" type="button" style="flex:1">⟳ زامن الآن</button><button class="btn alt" id="sbOut" type="button">خروج</button><button class="btn alt" id="sbClose" type="button">إغلاق</button></div>
+ <details class="grp" id="sbCfg" style="margin-top:10px"><summary>إعدادات الاتصال (للمطوّر فقط)</summary>
+  <label>رابط المشروع (Project URL)</label><input type="text" id="sbUrl" dir="ltr" placeholder="https://xxxx.supabase.co" autocomplete="off">
+  <label>المفتاح العام (publishable / anon)</label><input type="password" id="sbKey" dir="ltr" autocomplete="off">
+ </details>
+ <div class="row"><button class="btn alt" id="sbNow" type="button" style="flex:1">⟳ زامن الآن</button><button class="btn alt" id="sbOut" type="button">خروج</button><button class="btn alt" id="sbClose" type="button">إغلاق</button></div>
 </div></div>
 <div id="mgTip"></div>
 <div id="zoomBar" role="group" aria-label="تكبير الورقة"><button id="zOut" type="button" title="تصغير">−</button><button id="zVal" type="button" title="ملاءمة عرض الشاشة">100%</button><button id="zIn" type="button" title="تكبير">+</button></div>
@@ -1088,7 +1090,7 @@ function sbCfgLoad(){let c={};try{c=JSON.parse(localStorage.getItem("awq_sb")||"
  SB.url=String(c.url||(EMBED_SBU.startsWith("__")?"":EMBED_SBU)).trim().replace(/\/+$/,"");SB.key=String(c.key||(EMBED_SBK.startsWith("__")?"":EMBED_SBK)).trim();
  try{SB.session=JSON.parse(localStorage.getItem("awq_sbs")||"null")}catch(e){SB.session=null}}
 function sbSaveSess(x){SB.session=x;try{x?localStorage.setItem("awq_sbs",JSON.stringify(x)):localStorage.removeItem("awq_sbs")}catch(e){}}
-function sbSess(j){return {access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Date.now()+(j.expires_in||3600)*1000,user:{id:j.user&&j.user.id,email:j.user&&j.user.email}}}
+function sbSess(j){return {access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Date.now()+(j.expires_in||3600)*1000,user:{id:j.user&&j.user.id,email:j.user&&j.user.email,name:j.user&&j.user.name}}}
 async function sbAuth(path,body){const r=await fx(SB.url+"/auth/v1/"+path,{method:"POST",headers:{"apikey":SB.key,"Content-Type":"application/json"},body:JSON.stringify(body)},20000);
  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error_description||j.msg||j.message||("خطأ "+r.status));return j}
 async function sbToken(){const s=SB.session;if(!s)throw new Error("غير مسجّل الدخول");if(s.expires_at-Date.now()>60000)return s.access_token;
@@ -1105,7 +1107,7 @@ const SYNCCOL={
 let syncTm=null;
 function syncSoon(){if(!SB.session)return;clearTimeout(syncTm);syncTm=setTimeout(()=>syncNow(false),1500)}
 function sbState(t,cls){SB.state=t;const b=$("#tSync");if(b){b.querySelector(".lbl").textContent=" "+t.replace(/^[^\s]+\s/,"");b.classList.toggle("ok",cls==="ok");b.classList.toggle("bad",cls==="bad")}
- const d=$("#syncDot");if(d)d.className="syncdot "+(cls||"");const e=$("#sbState");if(e)e.textContent=t+(SB.last&&cls==="ok"?" — "+new Date(SB.last).toLocaleTimeString("ar-LY"):"");const h=$("#syncHint");if(h&&SB.session)h.textContent="☁ "+t+(SB.session.user&&SB.session.user.email?" — "+SB.session.user.email:"")}
+ const d=$("#syncDot");if(d)d.className="syncdot "+(cls||"");const e=$("#sbState");if(e)e.textContent=t+(SB.last&&cls==="ok"?" — "+new Date(SB.last).toLocaleTimeString("ar-LY"):"");const h=$("#syncHint");if(h&&SB.session)h.textContent="☁ "+t+(SB.session.user&&(SB.session.user.name||SB.session.user.email)?" — "+(SB.session.user.name||SB.session.user.email):"")}
 async function syncNow(first){if(!SB.session||SB.busy||!SB.url)return;SB.busy=true;sbState("⟳ تتزامن…","busy");
  try{const rows=(await sbRest("awq_store?select=kind,id,data,updated_at,deleted"))||[];const rem={};rows.forEach(r=>{rem[r.kind+"|"+r.id]=r});
   const push=[];let T=[];try{T=JSON.parse(localStorage.getItem("awq_tomb")||"[]")}catch(e){}
@@ -1126,17 +1128,23 @@ async function syncNow(first){if(!SB.session||SB.busy||!SB.url)return;SB.busy=tr
  catch(e){sbState("⚠ فشلت المزامنة: "+e.message,"bad")}
  SB.busy=false}
 function sbRefresh(){const on=!!SB.session;if(!SB.url||!SB.key){sbState("☁ غير مهيّأ")}else if(!on){sbState("☁ غير مسجّل")}else if(!SB.last){sbState("☁ مسجّل")}}
-function sbOpen(){sbCfgLoad();$("#sbUrl").value=SB.url;$("#sbKey").value=SB.key;$("#sbMail").value=(SB.session&&SB.session.user&&SB.session.user.email)||lsGet("awq_sbmail");$("#sbPass").value="";sbRefresh();$("#syncModal").classList.remove("hid")}
-function sbSaveCfg(){const u=$("#sbUrl").value.trim().replace(/\/+$/,""),k=$("#sbKey").value.trim();if(!/^https?:\/\/.+/.test(u)||!k){toast("اكتب رابط المشروع والمفتاح العام أولاً");return false}
+const sbEmbedded=()=>!EMBED_SBU.startsWith("__")&&!EMBED_SBK.startsWith("__");
+function sbOpen(){sbCfgLoad();$("#sbUrl").value=SB.url;$("#sbKey").value=SB.key;$("#sbName").value=(SB.session&&SB.session.user&&SB.session.user.name)||lsGet("awq_sbname");$("#sbCode").value="";
+ $("#sbCfg").style.display=sbEmbedded()?"none":"";sbRefresh();$("#syncModal").classList.remove("hid");setTimeout(()=>{try{($("#sbName").value?$("#sbCode"):$("#sbName")).focus()}catch(e){}},80)}
+function sbSaveCfg(){if(sbEmbedded())return !!(SB.url&&SB.key);const u=$("#sbUrl").value.trim().replace(/\/+$/,""),k=$("#sbKey").value.trim();
+ if(!/^https?:\/\/.+/.test(u)||!k){$("#sbCfg").open=true;toast("اكتب رابط المشروع والمفتاح من «إعدادات الاتصال»");return false}
  lsSet("awq_sb",JSON.stringify({url:u,key:k}));SB.url=u;SB.key=k;return true}
-async function sbLogin(signup){if(!sbSaveCfg())return;const email=$("#sbMail").value.trim(),pw=$("#sbPass").value;if(!email||!pw)return toast("اكتب البريد وكلمة المرور");lsSet("awq_sbmail",email);
- const b=signup?$("#sbUp"):$("#sbIn");b.disabled=true;
- try{const j=signup?await sbAuth("signup",{email,password:pw}):await sbAuth("token?grant_type=password",{email,password:pw});
-  if(j.access_token){sbSaveSess(sbSess(j));$("#sbPass").value="";toast("تم تسجيل الدخول");syncNow(true)}else toast("تم إنشاء الحساب. أكّد بريدك الإلكتروني ثم سجّل الدخول")}
- catch(e){sbState("⚠ "+e.message,"bad");toast("تعذر: "+e.message)}b.disabled=false}
+async function sbLogin(){if(!sbSaveCfg())return;const name=$("#sbName").value.trim(),code=$("#sbCode").value;
+ if(name.length<2)return toast("اكتب اسمك");if(code.length<4)return toast("الرمز 4 خانات على الأقل");
+ const b=$("#sbIn");b.disabled=true;b.textContent="⟳ لحظة…";
+ try{const r=await fx(SB.url+"/functions/v1/auth-name",{method:"POST",headers:{"apikey":SB.key,"Authorization":"Bearer "+SB.key,"Content-Type":"application/json"},body:JSON.stringify({name,code})},30000);
+  const j=await r.json().catch(()=>({}));if(!r.ok||!j.access_token)throw new Error(j.error||("خطأ "+r.status));
+  sbSaveSess(sbSess(j));lsSet("awq_sbname",name);$("#sbCode").value="";toast(j.created?"تم إنشاء حسابك وتسجيل الدخول":"تم تسجيل الدخول");$("#syncModal").classList.add("hid");syncNow(true)}
+ catch(e){sbState("⚠ "+e.message,"bad");toast(e.message)}
+ b.disabled=false;b.textContent="دخول"}
 $("#tSync").onclick=sbOpen;$("#syncOpen").onclick=sbOpen;$("#sbClose").onclick=()=>$("#syncModal").classList.add("hid");
 $("#syncModal").addEventListener("click",e=>{if(e.target.id==="syncModal")$("#syncModal").classList.add("hid")});
-$("#sbIn").onclick=()=>sbLogin(false);$("#sbUp").onclick=()=>sbLogin(true);
+$("#sbIn").onclick=sbLogin;$("#sbCode").addEventListener("keydown",e=>{if(e.key==="Enter")sbLogin()});$("#sbName").addEventListener("keydown",e=>{if(e.key==="Enter")$("#sbCode").focus()});
 $("#sbNow").onclick=()=>{if(!SB.session)return toast("سجّل الدخول أولاً");syncNow(true)};
 $("#sbOut").onclick=()=>{sbSaveSess(null);SB.last=0;sbState("☁ غير مسجّل");toast("خرجت من الحساب (بياناتك المحلية باقية)")};
 window.addEventListener("online",()=>syncSoon());

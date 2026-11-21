@@ -70,3 +70,7 @@
 ## Supabase والخصائص المتقدمة
 - `supabase/schema.sql` جدول واحد `awq_store(user_id, kind, id, data jsonb, deleted, updated_at)` مع RLS؛ `kind` = letter | tpl | fmt | prefs. المزامنة محلية أولاً (`syncNow` في الصفحة، REST مباشر بدون SDK) وآخر تعديل يفوز (`u` على كل عنصر)، والحذف عبر `tomb()` ثم صف `deleted=true`. الإعدادات: `awq_sb` (الرابط والمفتاح) و`awq_sbs` (الجلسة). `supabase/mock_server.py` خادم محاكاة للاختبار.
 - «خصائص متقدمة» قائمة أكورديون (مجموعة واحدة مفتوحة): أحجام الخطوط، المسافات، الهوامش، المحاذاة والإظهار، أدوات الوورد، الجداول، بحث واستبدال، الحفظ والمزامنة، الذكاء والمفاتيح. اختيار/حفظ قالب التنسيق في كارت «التحرير» وليس داخلها.
+
+## الدخول بالاسم والرمز (بدون بريد)
+- النافذة «☁ حسابي»: اسم عربي + رمز (4+ خانات). الصفحة ترسل `{name,code}` إلى دالة Supabase Edge `auth-name` (`supabase/functions/auth-name/index.ts`، `verify_jwt=false`) فتحوّل الاسم لبريد داخلي ثابت `u<hash>@marasilati.app` والرمز لكلمة مرور مشتقة (SHA-256 + `AWQ_PEPPER`)، وتنشئ الحساب أول مرة (بلا تأكيد) وترجع جلسة عادية. الاسم يُوحَّد (تشكيل/ألف/ياء/مسافات). نفس الاسم+الرمز = نفس البيانات على أي جهاز.
+- نشر الدالة: `supabase functions deploy auth-name --project-ref qpindseciwxoageaqdtf --use-api --no-verify-jwt`.
