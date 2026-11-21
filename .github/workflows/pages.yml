@@ -22,6 +22,8 @@ jobs:
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_KEY: ${{ secrets.GROQ_API_KEY }}
+          SB_URL: ${{ secrets.SUPABASE_URL }}
+          SB_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           mkdir site
           cp static/index.html site/index.html
@@ -30,6 +32,8 @@ jobs:
           cp -r prompts site/prompts
           sed -i "s|__GEMINI_KEY__|${GEMINI_KEY}|" site/index.html
           sed -i "s|__GROQ_KEY__|${GROQ_KEY}|" site/index.html
+          sed -i "s|__SB_URL__|${SB_URL}|" site/index.html
+          sed -i "s|__SB_KEY__|${SB_KEY}|" site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
