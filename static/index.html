@@ -496,7 +496,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  </div>
  <div class="sec"><h3><i>4</i>إخراج</h3>
   <div class="row" style="margin-top:0"><button class="btn gold" id="pdf" style="flex:1">⬇ تنزيل PDF</button><button class="btn wa" id="wa" style="flex:1">➤ إرسال واتساب</button></div>
-  <div class="row"><button class="btn" id="save" style="flex:1">حفظ في الأرشيف</button><button class="btn alt" id="prt">🖨 طباعة</button><button class="btn alt" id="tplMk" style="flex:1">📌 احفظ كقالب</button></div>
+  <div class="row"><button class="btn" id="save" style="flex:1" title="تتحفظ تلقائياً، هذا للتأكيد">💾 احفظ الآن</button><button class="btn alt" id="prt">🖨 طباعة</button><button class="btn alt" id="tplMk" style="flex:1">📌 احفظ كقالب</button></div>
   <div class="hint">ينزل PDF جاهز (A4) مباشرة بدون نافذة طباعة. واتساب: في الجوال تفتح قائمة المشاركة وتختار واتساب، وفي الكمبيوتر ينزل الملف ويفتح واتساب لترفقه.</div>
  </div>
 </aside>
@@ -517,7 +517,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  <input type="text" id="q" placeholder="بحث في الأرشيف…">
  <div id="list"></div>
  <div class="row"><button class="btn alt" id="merge">دمج المحدد في PDF واحد</button></div>
- <div class="hint">الأرشيف محفوظ في هذا المتصفح. حدد أكثر من مراسلة بالمربعات واضغط «دمج» لملف PDF واحد.</div>
+ <div class="hint">كل مراسلاتك تتحفظ تلقائياً في حسابك (☁) أول ما تُكتب أو تتعدّل، وتظهر هنا على أي جهاز تسجّل فيه. حدد أكثر من مراسلة بالمربعات واضغط «دمج» لملف PDF واحد.</div>
 </div></div>
 <div class="hid" id="tplView"><div class="arch">
  <h3 style="margin:0 0 6px;color:var(--g)">📋 مراسلات معتادة (قوالب)</h3>
@@ -689,7 +689,7 @@ async function api(path,body){
 $("#gen").onclick=async()=>{const v=$("#topic").value.trim();if(!v)return toast("احكي أو اكتب شن تبي أولاً");
  $("#gen").disabled=true;$("#gen").innerHTML='<span class="spin">⟳</span> يحلل ويكتب…';
  try{last=await api("/api/compose",{text:v});
-  setBody(blocksToHtml(last.blocks||[]));
+  setBody(blocksToHtml(last.blocks||[]));CURID=null;autoArchive();
   if(Array.isArray(last.cc)&&last.cc.length){last.cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});cc=CC.filter(c=>last.cc.includes(c));renderCks();drawBottom()}
   $("#fit").click();showAn();toast("النوع: "+(last.type||""));if(innerWidth<=820)setTimeout(()=>$(".stage").scrollIntoView({behavior:"smooth"}),300)}
  catch(e){toast("تعذر: "+e.message)}
@@ -762,7 +762,7 @@ function drawBottom(){
  CCH=`<div class="h">صـــورة إلـــى :-</div>`+cc.map(c=>`<div class="i">${DOC} ${c}.</div>`).join("")+`<div class="typ"><span style="font-size:10pt">✍</span>${KB} ${escH($("#sw")?$("#sw").value.trim():"شيتة")} &nbsp;&nbsp; <span dir="ltr" class="n">${ds}</span>م</div>`;
  N1=$("#sn").value;N2=$("#st").value;layoutAll()}
 function renderCks(){$("#cks").innerHTML=CC.map(c=>`<label class="ck"><input type="checkbox" value="${c}" ${cc.includes(c)?"checked":""}>${c}</label>`).join("");
- $$("#cks input").forEach(i=>i.onchange=()=>{cc=CC.filter(x=>$$("#cks input:checked").some(y=>y.value==x));drawBottom()})}
+ $$("#cks input").forEach(i=>i.onchange=()=>{cc=CC.filter(x=>$$("#cks input:checked").some(y=>y.value==x));drawBottom();autoArchive()})}
 renderCks();
 $("#ccAdd").onclick=()=>{const v=$("#ccNew").value.trim().replace(/[.،]+$/,"");if(!v)return toast("اكتب اسم الجهة");if(!CC.includes(v))CC.push(v);if(!cc.includes(v))cc.push(v);$("#ccNew").value="";renderCks();drawBottom();autoSave()};
 $("#ccNew").addEventListener("keydown",e=>{if(e.key=="Enter")$("#ccAdd").click()});
@@ -794,7 +794,7 @@ function layoutAll(){const c=saveCaret();
 function needs(){const pg=$$(".a4");for(let i=0;i<pg.length;i++){const b=pg[i].querySelector(".body"),av=avail(pg[i]);
  if(b.offsetHeight>av&&b.children.length>1)return true;if(i>0&&!b.children.length)return true;
  const nx=pg[i+1];if(nx){const f=nx.querySelector(".body").firstElementChild;if(f&&b.offsetHeight+f.offsetHeight+14<=av&&!(b.lastElementChild&&b.lastElementChild.classList.contains("pbrk")))return true}}return false}
-let tm;function onEdit(){clearTimeout(tm);tm=setTimeout(()=>{if(needs())layoutAll();else status()},250)}
+let tm;function onEdit(){clearTimeout(tm);tm=setTimeout(()=>{if(needs())layoutAll();else status()},250);autoArchive()}
 function fitCheck(){if(needs())layoutAll();else status()}
 function status(){const s=$("#stat");s.className="stat ok";s.textContent=PN==1?"✔ صفحة واحدة":`${PN} صفحات — التوقيع في الصفحة ${sigAt+1}`}
 let SC=1;
@@ -902,16 +902,24 @@ $("#wa").onclick=async()=>{const b=$("#wa");
 $("#prt").onclick=()=>{clearAiHl();toast("اختر «حفظ بصيغة PDF» وألغِ الرؤوس والتذييلات");setTimeout(()=>window.print(),600)};
 $("#merge").onclick=()=>withBusy("#merge",async()=>{const ids=$$("#list [data-c]:checked").map(c=>+c.dataset.c);
  if(!ids.length)return toast("حدد مراسلة أو أكثر بالمربعات أولاً");
- const keep={h:getBody(),cc:[...cc],last},pdf=newPdf();view(1);await new Promise(r=>setTimeout(r,250));
+ ARCLOCK=true;clearTimeout(arcTm);const keep={h:getBody(),cc:[...cc],last},pdf=newPdf();view(1);await new Promise(r=>setTimeout(r,250));
  try{for(const x of store.filter(y=>ids.includes(y.id))){setBody(x.h);cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();await document.fonts.ready;await new Promise(r=>setTimeout(r,200));await pagesToPdf(pdf)}}
- finally{setBody(keep.h);cc=keep.cc;last=keep.last;renderCks();drawBottom()}
+ finally{setBody(keep.h);cc=keep.cc;last=keep.last;renderCks();drawBottom();ARCLOCK=false}
  const d=new Date();dlBlob(pdf.output("blob"),"مراسلات_مدمجة_"+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+".pdf");view(0);toast("تم دمج "+ids.length+" مراسلة في ملف واحد")});
 
 let store=[];try{store=JSON.parse(localStorage.getItem("awq2")||"[]")}catch(e){}
 const persist=sy=>{try{localStorage.setItem("awq2",JSON.stringify(store))}catch(e){}if(sy!==false)syncSoon()};
-$("#save").onclick=()=>{store.unshift({id:Date.now(),u:Date.now(),t:type,h:getBody(),s:(($$(".body")[0].innerText||"").split("\n")[0]||"").slice(0,60),d:new Date().toLocaleDateString("ar-LY"),cc:[...cc]});persist();list();toast("حُفظت في الأرشيف")};
+let CURID=null,arcTm=null,ARCLOCK=false;
+function arcTitle(){const b=$$(".body")[0];return(((b&&b.innerText)||"").split("\n").map(x=>x.trim()).find(Boolean)||"").slice(0,60)}
+function autoArchive(){clearTimeout(arcTm);arcTm=setTimeout(arcSave,1200)}
+function arcSave(){if(ARCLOCK||$("#wrap").classList.contains("tplmode"))return false;const h=getBody();if(!h.replace(/<[^>]*>/g,"").trim())return false;
+ const now=Date.now(),s2=arcTitle(),ty=(last&&last.type)||"مراسلة";let it=CURID!=null?store.find(x=>x.id===CURID):null;
+ if(!it){it={id:now,u:now,t:ty,h,s:s2,d:new Date().toLocaleDateString("ar-LY"),cc:[...cc]};store.unshift(it);CURID=it.id;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
+ if(it.h===h&&it.s===s2&&JSON.stringify(it.cc)===JSON.stringify(cc))return true;
+ it.h=h;it.s=s2;it.cc=[...cc];it.t=ty;it.u=now;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
+$("#save").onclick=()=>{clearTimeout(arcTm);toast(arcSave()?"✓ محفوظة في حسابك":"ما فيه نص للحفظ")};
 function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||x.s.includes(q)||x.t.includes(q)).map(x=>`<div class="it"><input type="checkbox" data-c="${x.id}"><div class="t">${x.s||"(بدون عنوان)"}<small>${x.d}</small></div><span class="tag">${x.t}</span><div class="ib"><button class="btn alt" data-o="${x.id}">فتح</button><button class="btn alt" data-x="${x.id}">حذف</button></div></div>`).join("")||"<div style='padding:14px;color:#888'>لا توجد مراسلات محفوظة بعد.</div>";
- $$("[data-o]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.o);setBody(x.h);cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();view(1)});
+ $$("[data-o]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.o);CURID=x.id;setBody(x.h);cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();view(1)});
  $$("[data-x]").forEach(b=>b.onclick=()=>{tomb("letter",b.dataset.x);store=store.filter(y=>y.id!=b.dataset.x);persist();list()})}
 $("#q").oninput=list;
 function view(n){const m=n===2?"tpl":(n?"new":"arc");document.body.dataset.v=m;
@@ -993,7 +1001,7 @@ $("#tuGo").onclick=()=>{const t=TUSE;if(!t)return;const val={};
  $$("#tuFields [data-i]").forEach(e=>{const v=t.vars[+e.dataset.i];let x=e.value.trim();if(e.dataset.d&&x)x=x.replace(/-/g,"/");val[v.name]=x});
  const d=document.createElement("div");d.innerHTML=t.html;
  d.querySelectorAll(".var").forEach(sp=>{const x=val[sp.dataset.v];const tm=document.createElement("template");tm.innerHTML=x?dg(esc(x)):'<span class="blank">..............</span>';sp.replaceWith(tm.content)});
- $("#tplUse").classList.add("hid");view(1);last={type:t.type||t.name};setBody(d.innerHTML);
+ $("#tplUse").classList.add("hid");view(1);last={type:t.type||t.name};setBody(d.innerHTML);CURID=null;autoArchive();
  cc=[...(t.cc||[])];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();$("#fit").click();toast("جاهزة: "+t.name);
  if(innerWidth<=820)setTimeout(()=>$(".stage").scrollIntoView({behavior:"smooth"}),300)};
 let TPLID=null;
@@ -1124,7 +1132,7 @@ async function syncNow(first){if(!SB.session||SB.busy||!SB.url)return;SB.busy=tr
   else if(lp&&lu>rpu)push.push({kind:"prefs",id:"main",data:lp,deleted:false,updated_at:new Date(lu).toISOString()});
   for(let i=0;i<push.length;i+=40)await sbRest("awq_store?on_conflict=user_id,kind,id",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(push.slice(i,i+40))});
   if(T.length){try{localStorage.removeItem("awq_tomb")}catch(e){}}
-  SB.last=Date.now();sbState("✓ متزامن","ok")}
+  SB.last=Date.now();sbState("✓ متزامن","ok");if(first==="login"&&store.length){list();if(!getBody().replace(/<[^>]*>/g,"").trim()){view(0);toast("نزلت "+store.length+" مراسلة من حسابك")}else toast("تم تسجيل الدخول — مراسلاتك في تبويب الأرشيف ("+store.length+")")}}
  catch(e){sbState("⚠ فشلت المزامنة: "+e.message,"bad")}
  SB.busy=false}
 function sbRefresh(){const on=!!SB.session;if(!SB.url||!SB.key){sbState("☁ غير مهيّأ")}else if(!on){sbState("☁ غير مسجّل")}else if(!SB.last){sbState("☁ مسجّل")}}
@@ -1139,7 +1147,7 @@ async function sbLogin(){if(!sbSaveCfg())return;const name=$("#sbName").value.tr
  const b=$("#sbIn");b.disabled=true;b.textContent="⟳ لحظة…";
  try{const r=await fx(SB.url+"/functions/v1/auth-name",{method:"POST",headers:{"apikey":SB.key,"Authorization":"Bearer "+SB.key,"Content-Type":"application/json"},body:JSON.stringify({name,code})},30000);
   const j=await r.json().catch(()=>({}));if(!r.ok||!j.access_token)throw new Error(j.error||("خطأ "+r.status));
-  sbSaveSess(sbSess(j));lsSet("awq_sbname",name);$("#sbCode").value="";toast(j.created?"تم إنشاء حسابك وتسجيل الدخول":"تم تسجيل الدخول");$("#syncModal").classList.add("hid");syncNow(true)}
+  sbSaveSess(sbSess(j));lsSet("awq_sbname",name);$("#sbCode").value="";toast(j.created?"تم إنشاء حسابك وتسجيل الدخول":"تم تسجيل الدخول");$("#syncModal").classList.add("hid");syncNow("login")}
  catch(e){sbState("⚠ "+e.message,"bad");toast(e.message)}
  b.disabled=false;b.textContent="دخول"}
 $("#tSync").onclick=sbOpen;$("#syncOpen").onclick=sbOpen;$("#sbClose").onclick=()=>$("#syncModal").classList.add("hid");
