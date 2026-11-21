@@ -594,12 +594,13 @@ const bl=(v,n)=>v?v:`<span class="blank">${".".repeat(n)}</span>`;
 
 const FRAG=h=>h.replace(/\{\{\s*تاريخ\s*\}\}/g,'<bdi dir="ltr">2026 / ...... / ......</bdi>').replace(/\{\{\s*فراغ\s*\}\}/g,'<span class="blank">..............</span>');
 const cleanTag=h=>String(h==null?"":h).replace(/<\/?[^>]*>/g,t=>(/^<\/?b>$/i.test(t)||/^<\/span>$/i.test(t)||/^<span class="var" data-v="[^"<>]*">$/.test(t))?t:"");
-function blocksToHtml(bl){return dg(bl.map(b=>{const h=FRAG(cleanTag(b.html||""));
+const szBlk=(b,h)=>{const n=+b.size;return n>=8&&n<=30?h.replace(/^<(p|ul)\b/,'<$1 style="font-size:'+n+'pt"'):h};
+function blocksToHtml(bl){return dg(bl.map(b=>szBlk(b,(b=>{const h=FRAG(cleanTag(b.html||""));
  if(b.role=="to")return `<p class="to">${h}</p>`;if(b.role=="greeting")return `<p class="gr">${h}</p>`;
  if(b.role=="table")return tableHtml(b.headers,b.rows);
  if(b.role=="bullet")return `<ul><li>${h}</li></ul>`;
  if(b.role=="closing")return `<p class="cl"><b>عـــليــــه ،،،</b> ${h}</p>`;
- if(b.role=="farewell")return `<p class="cx">${h}</p>`;return `<p>${h}</p>`}).join(""))}
+ if(b.role=="farewell")return `<p class="cx">${h}</p>`;return `<p>${h}</p>`})(b))).join(""))}
 let last=null;
 const STATIC=/github\.io$/.test(location.hostname)||location.search.includes("static");
 const KEYN="awq_gkey",GMODELS=["gemini-3-flash-preview","gemini-3.1-flash-lite","gemini-flash-latest"];
@@ -704,7 +705,7 @@ async function api(path,body){
 $("#gen").onclick=async()=>{const v=$("#topic").value.trim();if(!v)return toast("احكي أو اكتب شن تبي أولاً");
  $("#gen").disabled=true;$("#gen").innerHTML='<span class="spin">⟳</span> يحلل ويكتب…';
  try{last=await api("/api/compose",{text:v});LASTREQ=v;
-  setBody(blocksToHtml(last.blocks||[]));CURID=null;autoArchive();
+  setBody(blocksToHtml(last.blocks||[]));CURID=null;autoArchive();applyAiFormat(last.format);
   if(Array.isArray(last.cc)&&last.cc.length){last.cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});cc=CC.filter(c=>last.cc.includes(c));renderCks();drawBottom()}
   $("#fit").click();showAn();toast("النوع: "+(last.type||""));if(innerWidth<=820)setTimeout(()=>$(".stage").scrollIntoView({behavior:"smooth"}),300)}
  catch(e){toast("تعذر: "+e.message)}
@@ -721,7 +722,11 @@ $("#popX").onclick=()=>$("#pop").style.display="none";
 $("#popGo").onclick=async()=>{if(!sr)return;const req=$("#popIn").value.trim();if(!req)return toast("اختار أو اكتب الطلب");
  const txt=sr.toString();$("#popGo").textContent="…";
  try{const j=await api("/api/edit",{selection:txt,request:req,context:$$(".body").map(b=>b.innerText).join("\n")});
-  sr.deleteContents();const m=document.createElement("span");m.className="aihl";m.innerHTML=cleanTag(j.text);sr.insertNode(m);setTimeout(()=>{clearAiHl();fitCheck()},2500);
+  const nt=j&&typeof j.text==="string"?cleanTag(j.text).trim():"";if(!nt)throw new Error("ما رجع نص من الذكاء، النص ما تغيّر");
+  const se=sr.startContainer.nodeType===1?sr.startContainer:sr.startContainer.parentElement,cs=getComputedStyle(se),bl=se.closest&&se.closest(".body > *"),bs=bl?getComputedStyle(bl):cs;
+  sr.deleteContents();const m=document.createElement("span");m.className="aihl";m.innerHTML=nt;
+  if(cs.fontSize!==bs.fontSize)m.style.fontSize=Math.round(parseFloat(cs.fontSize)*.75*2)/2+"pt";if(cs.fontWeight!==bs.fontWeight)m.style.fontWeight=cs.fontWeight;if(cs.fontStyle!==bs.fontStyle)m.style.fontStyle=cs.fontStyle;if(cs.textDecorationLine!==bs.textDecorationLine)m.style.textDecoration=cs.textDecorationLine;
+  sr.insertNode(m);setTimeout(()=>{clearAiHl();fitCheck()},2500);
   $("#pop").style.display="none";getSelection().removeAllRanges();fitCheck();toast("تم تعديل الجزء")}
  catch(e){toast("تعذر: "+e.message)}$("#popGo").textContent="طبّق"};
 let REC=null,RECON=false,baseTxt="",micLi=0;const MICL=["ar-LY","ar-SA"];
@@ -832,7 +837,7 @@ function scale(){const st=$(".stage"),w=st.clientWidth-36,s0=Math.min(1,w/(210*P
 function zoomTo(z){ZM=Math.max(.5,Math.min(3,Math.round(z*100)/100));scale()}
 $("#zIn").onclick=()=>zoomTo(ZM*1.2);$("#zOut").onclick=()=>zoomTo(ZM/1.2);$("#zVal").onclick=()=>{zoomTo(1);toast("ملاءمة عرض الشاشة")};
 $(".stage").addEventListener("wheel",e=>{if(e.ctrlKey){e.preventDefault();zoomTo(ZM*(e.deltaY<0?1.1:1/1.1))}},{passive:false});
-function clearAiHl(){$$(".body .aihl,.body span[style*='background']").forEach(sp=>{if(sp.isConnected)sp.replaceWith(...sp.childNodes)})}
+function clearAiHl(){$$(".body .aihl,.body span[style*='background']").forEach(sp=>{if(!sp.isConnected)return;sp.style.background="";sp.classList.remove("aihl");if(!sp.getAttribute("style")&&!sp.className)sp.replaceWith(...sp.childNodes);else if(!sp.className)sp.removeAttribute("class")})}
 function setBody(h){pagesEl.innerHTML="";const p=mkPage(0);pagesEl.appendChild(p);p.querySelector(".body").innerHTML=h;clearAiHl();layoutAll()}
 function getBody(){clearAiHl();return $$(".body").map(b=>b.innerHTML).join("")}
 let LHB=2;
@@ -925,16 +930,19 @@ $("#merge").onclick=()=>withBusy("#merge",async()=>{const ids=$$("#list [data-c]
 let store=[];try{store=JSON.parse(localStorage.getItem("awq2")||"[]")}catch(e){}
 const persist=sy=>{try{localStorage.setItem("awq2",JSON.stringify(store))}catch(e){}if(sy!==false)syncSoon()};
 let CURID=null,arcTm=null,ARCLOCK=false;
+function arcName(){const t=(last&&last.type)||"مراسلة",e=document.querySelector(".body .to"),to=e?e.innerText.replace(/^\s*(السيـد|السيد|السيدة|السادة)\s*\/?\s*/,"").trim():"";return (t+(to?" — "+to:"")).slice(0,70)}
 function arcTitle(){const b=$$(".body")[0];return(((b&&b.innerText)||"").split("\n").map(x=>x.trim()).find(Boolean)||"").slice(0,60)}
 function autoArchive(){clearTimeout(arcTm);arcTm=setTimeout(arcSave,1200)}
 function arcSave(){if(ARCLOCK||$("#wrap").classList.contains("tplmode"))return false;const h=getBody();if(!h.replace(/<[^>]*>/g,"").trim())return false;
- const now=Date.now(),s2=arcTitle(),ty=(last&&last.type)||"مراسلة";let it=CURID!=null?store.find(x=>x.id===CURID):null;
- if(!it){it={id:now,u:now,t:ty,h,s:s2,d:new Date().toLocaleDateString("ar-LY"),cc:[...cc]};store.unshift(it);CURID=it.id;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
- if(it.h===h&&it.s===s2&&JSON.stringify(it.cc)===JSON.stringify(cc))return true;
- it.h=h;it.s=s2;it.cc=[...cc];it.t=ty;it.u=now;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
-$("#saveQ").onclick=()=>$("#save").click();$("#save").onclick=()=>{clearTimeout(arcTm);toast(arcSave()?"✓ محفوظة في حسابك":"ما فيه نص للحفظ")};
-function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||x.s.includes(q)||x.t.includes(q)).map(x=>`<div class="it"><input type="checkbox" data-c="${x.id}"><div class="t">${x.s||"(بدون عنوان)"}<small>${x.d}</small></div><span class="tag">${x.t}</span><div class="ib"><button class="btn alt" data-o="${x.id}">فتح</button><button class="btn alt" data-x="${x.id}">حذف</button></div></div>`).join("")||"<div style='padding:14px;color:#888'>لا توجد مراسلات محفوظة بعد.</div>";
+ const now=Date.now(),s2=arcTitle(),ty=(last&&last.type)||"مراسلة",nm=arcName();let it=CURID!=null?store.find(x=>x.id===CURID):null;
+ if(!it){it={id:now,u:now,t:ty,n:nm,h,s:s2,d:new Date().toLocaleDateString("ar-LY"),cc:[...cc]};store.unshift(it);CURID=it.id;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
+ if(it.h===h&&it.s===s2&&(it.named||it.n===nm)&&JSON.stringify(it.cc)===JSON.stringify(cc))return true;
+ it.h=h;it.s=s2;it.cc=[...cc];it.t=ty;if(!it.named)it.n=nm;it.u=now;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
+$("#saveQ").onclick=()=>$("#save").click();$("#save").onclick=()=>{clearTimeout(arcTm);if(!arcSave())return toast("ما فيه نص للحفظ");const it=store.find(x=>x.id===CURID);if(!it)return;
+ const nm=prompt("اسم المراسلة في الأرشيف:",it.n||arcName());if(nm===null)return toast("✓ محفوظة في حسابك");const v=nm.trim();if(v){it.n=v;it.named=true;it.u=Date.now();persist();list()}toast("✓ محفوظة باسم: "+(it.n||""))};
+function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||(x.s||"").includes(q)||(x.n||"").includes(q)||(x.t||"").includes(q)).map(x=>`<div class="it"><input type="checkbox" data-c="${x.id}"><div class="t">${escH(x.n||x.s||"(بدون عنوان)")}<small>${x.d}</small></div><span class="tag">${x.t}</span><div class="ib"><button class="btn alt" data-o="${x.id}">فتح</button><button class="btn alt" data-r="${x.id}">تسمية</button><button class="btn alt" data-x="${x.id}">حذف</button></div></div>`).join("")||"<div style='padding:14px;color:#888'>لا توجد مراسلات محفوظة بعد.</div>";
  $$("[data-o]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.o);CURID=x.id;setBody(x.h);cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();view(1)});
+ $$("[data-r]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.r);if(!x)return;const nm=prompt("اسم المراسلة:",x.n||x.s||"");if(nm===null)return;const v=nm.trim();if(v){x.n=v;x.named=true;x.u=Date.now();persist();list()}});
  $$("[data-x]").forEach(b=>b.onclick=()=>{tomb("letter",b.dataset.x);store=store.filter(y=>y.id!=b.dataset.x);persist();list()})}
 $("#q").oninput=list;
 function view(n){const m=n===2?"tpl":(n?"new":"arc");document.body.dataset.v=m;
@@ -1085,7 +1093,7 @@ $("#frGo").onclick=()=>{const f=$("#frF").value,r=$("#frR").value;if(!f)return t
  const w=document.createTreeWalker(pagesEl,NodeFilter.SHOW_TEXT,{acceptNode:x=>x.parentElement&&x.parentElement.closest(".body")?1:2}),L=[];let x;while(x=w.nextNode())L.push(x);
  L.forEach(t=>{if(t.data.includes(f)){n+=t.data.split(f).length-1;t.data=t.data.split(f).join(r)}});if(n)layoutAll();toast(n?"تم استبدال "+n+" موضع":"ما لقيت النص (قد يكون مقسوماً بين خطّين مختلفين)")};
 /* ===== مراجعة وتعديل (إملاء + نحو + صياغة، والفكرة تبقى) ===== */
-let LASTREQ="",REVBK=null;
+let LASTREQ="",REVBK=null,REVFMT=null;
 function revBlocks(){const all=[];$$(".body").forEach(b=>all.push(...b.children));const L=[];
  all.forEach((el,i)=>{if(el.classList.contains("pbrk")||el.tagName==="TABLE")return;
   const role=el.classList.contains("to")?"to":el.classList.contains("gr")?"greeting":el.classList.contains("cl")?"closing":el.classList.contains("cx")?"farewell":/^(UL|OL)$/.test(el.tagName)?"list":"body";
@@ -1093,22 +1101,34 @@ function revBlocks(){const all=[];$$(".body").forEach(b=>all.push(...b.children)
   h=h.replace(/<span class="n">([^<]*)<\/span>/g,"$1").replace(/<bdi[^>]*>|<\/bdi>/g,"").replace(/<span class="blank">[^<]*<\/span>/g,"{{فراغ}}");
   if(h.replace(/<[^>]*>/g,"").trim())L.push({i,role,html:h})});return L}
 function revApply(res){const all=[];$$(".body").forEach(b=>all.push(...b.children));let n=0;
- (res.blocks||[]).forEach(r=>{const el=all[r.i];if(!el||typeof r.html!=="string")return;
+ (res.blocks||[]).forEach(r=>{const el=all[r.i];if(!el)return;
+  if(Array.isArray(r.items)&&r.items.length){const as=r.as==="body"?"body":"bullet",tmp=document.createElement("div");tmp.innerHTML=blocksToHtml(r.items.map(t=>({role:as,html:String(t),size:r.size})));
+   [...tmp.children].forEach(c=>el.before(c));el.remove();n++;return}
+  if(typeof r.html!=="string")return;
+  if(r.size>=8&&r.size<=30)el.style.fontSize=r.size+"pt";
   if(/^(UL|OL)$/.test(el.tagName)){el.innerHTML=dg(FRAG(r.html.replace(/<\/?[^>]*>/g,t=>/^<\/?(b|li)>$/i.test(t)?t:"")));n++;return}
   const role=el.classList.contains("to")?"to":el.classList.contains("gr")?"greeting":el.classList.contains("cl")?"closing":el.classList.contains("cx")?"farewell":"body";
   const tmp=document.createElement("div");tmp.innerHTML=blocksToHtml([{role,html:r.html}]);if(tmp.firstElementChild){el.innerHTML=tmp.firstElementChild.innerHTML;n++}});
- (res.add||[]).forEach(a=>{const ref=all[a.after];if(!ref||!a.html)return;const tmp=document.createElement("div");tmp.innerHTML=blocksToHtml([{role:"body",html:a.html}]);if(tmp.firstElementChild){ref.after(tmp.firstElementChild);n++}});
+ (res.add||[]).forEach(a=>{const ref=all[a.after];if(!ref||!a.html)return;const tmp=document.createElement("div");tmp.innerHTML=blocksToHtml([{role:a.role==="bullet"?"bullet":"body",html:a.html,size:a.size}]);if(tmp.firstElementChild){ref.after(tmp.firstElementChild);n++}});
  return n}
 $("#rev").onclick=()=>withBusy("#rev",async()=>{const L=revBlocks();if(!L.length)return toast("اكتب أو ولّد مراسلة على الورقة أولاً");
  const t=$("#topic").value.trim(),instr=(t&&t!==LASTREQ)?t:"";
  const res=await api("/api/review",{text:JSON.stringify({instruction:instr,blocks:L})});
- REVBK=getBody();const n=revApply(res||{});layoutAll();fitCheck();autoArchive();
+ REVBK=getBody();REVFMT={...FMT,lh:LHB};const n=revApply(res||{})+applyAiFormat(res&&res.format);layoutAll();fitCheck();autoArchive();
  const ch=(res&&Array.isArray(res.changes)?res.changes:[]).slice(0,6).map(x=>"<li>"+esc(x)+"</li>").join("");
  const rn=$("#revNote");rn.style.display="block";
  rn.innerHTML=(n?"✓ تمت المراجعة"+(instr?" وتنفيذ تعليمتك":"")+" ("+n+" موضع)":"✓ ما لقيت شي يحتاج تعديل")+(ch?"<ul>"+ch+"</ul>":"")+(n?'<button class="btn alt" id="revUndo" type="button">↶ رجّع قبل المراجعة</button>':"");
- const u=$("#revUndo");if(u)u.onclick=()=>{if(REVBK==null)return;setBody(REVBK);autoArchive();rn.style.display="none";REVBK=null;toast("رجعت النص قبل المراجعة")};
+ const u=$("#revUndo");if(u)u.onclick=()=>{if(REVBK==null)return;setBody(REVBK);if(REVFMT){FMT={...FMT0,...REVFMT};setLHBase(FMT.lh);FMTID=null;fmtApply(false);REVFMT=null}autoArchive();rn.style.display="none";REVBK=null;toast("رجعت النص قبل المراجعة")};
  if(instr)toast("نُفّذت تعليمتك"); else toast(n?"تمت المراجعة":"النص سليم");
  if(innerWidth<=820)rn.scrollIntoView({behavior:"smooth",block:"center"})});
+/* ===== أوامر التنسيق من الذكاء (خط، مسافات، هوامش، محاذاة) ===== */
+function applyAiFormat(f){if(!f||typeof f!=="object")return 0;let n=0;
+ for(const k of Object.keys(f)){const v=f[k];
+  if(k==="lh"){const x=+v;if(x>=1.2&&x<=2.4){setLHBase(x);n++}}
+  else if(k==="fs"&&isFinite(+v)){const x=Math.max(FR.fs[0],Math.min(FR.fs[1],+v)),d=x-FMT.fs;["fsTo","fsGr","fsCx","fsSig"].forEach(y=>{FMT[y]=Math.max(FR[y][0],Math.min(FR[y][1],Math.round((FMT[y]+d)*2)/2))});FMT.fs=x;FMT.fsCl=x;n++}
+  else if(FR[k]&&typeof v!=="boolean"&&isFinite(+v)){FMT[k]=Math.max(FR[k][0],Math.min(FR[k][1],+v));n++}
+  else if(["just","ctrCl","ctrCx","showCc","showSig","showTyp"].includes(k)&&typeof v==="boolean"){FMT[k]=v;n++}}
+ if(n){FMTID=null;fmtApply(false)}return n}
 const PD={sn:"عبدالرحيم أحمد شيتة",st:"رئيس قسم الإعلام",sw:"شيتة"},CC0=[...CC],CCSEL0=[...cc];
 let PREF_READY=false,prefTm=null;
 function prefsGet(){try{return JSON.parse(localStorage.getItem("awq_prefs")||"null")}catch(e){return null}}
