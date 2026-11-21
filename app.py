@@ -99,7 +99,7 @@ def today_line():
 MOCK_LETTER = {
     "type": "تكليف",
     "blocks": [
-        {"role": "to", "html": "السيد / محمد لطرش"},
+        {"role": "to", "html": "السيد / محمد الفلاني"},
         {"role": "greeting", "html": "السلام عليكم ورحمة الله وبركاته"},
         {"role": "body", "html": "نكلفك بـ<b>التغطية الإعلامية</b> لزيارة <b>السيد / رئيس الهيئة العامة للأوقاف والشؤون الإسلامية</b>، وذلك يوم {{فراغ}} الموافق {{تاريخ}}م، بـ {{فراغ}}، على أن تتولى <b>نشر المادة مباشرةً</b> على صفحة المكتب."},
         {"role": "closing", "html": "نأمل المباشرة في التنفيذ."},
@@ -161,7 +161,7 @@ def transcribe():
     if not audio:
         return jsonify(error="التسجيل فاضي"), 400
     if MOCK:
-        return jsonify(text="نبي نكلف محمد لطرش يغطي زيارة رئيس الهيئة")
+        return jsonify(text="نبي نكلف محمد الفلاني يغطي زيارة رئيس الهيئة")
     if not GEMINI_KEY:
         return jsonify(error="GEMINI_API_KEY غير مضبوط"), 500
     try:
@@ -186,7 +186,7 @@ def tplvars():
         return jsonify(error="النص فارغ"), 400
     try:
         if MOCK:
-            return jsonify(variables=[{"name": "اسم الموظف", "text": "محمد لطرش"}])
+            return jsonify(variables=[{"name": "اسم الموظف", "text": "محمد الفلاني"}])
         return jsonify(gemini(TPLVARS, text, 0.2))
     except Exception as e:
         return jsonify(error=str(e)), 500
