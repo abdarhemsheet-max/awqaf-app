@@ -20,6 +20,7 @@ def read(p):
 SYSTEM = read("prompts/system_prompt.md")
 EDIT = read("prompts/edit_prompt.md")
 TABLE = read("prompts/table_prompt.md")
+REVIEW = read("prompts/review_prompt.md")
 
 LOGIN = """<!doctype html><html lang=ar dir=rtl><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>دخول</title><body style="font-family:sans-serif;background:#eef1ee;display:grid;place-items:center;height:100vh;margin:0">
@@ -188,6 +189,19 @@ def tplvars():
         if MOCK:
             return jsonify(variables=[{"name": "اسم الموظف", "text": "محمد الفلاني"}])
         return jsonify(gemini(TPLVARS, text, 0.2))
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
+@app.post("/api/review")
+@need_login
+def review():
+    text = (request.json or {}).get("text", "").strip()
+    if not text:
+        return jsonify(error="النص فارغ"), 400
+    try:
+        if MOCK:
+            return jsonify(blocks=[], add=[], changes=["ما لقيت أخطاء، النص سليم"])
+        return jsonify(gemini(REVIEW, text, 0.3))
     except Exception as e:
         return jsonify(error=str(e)), 500
 

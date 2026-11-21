@@ -428,10 +428,15 @@ textarea::-webkit-scrollbar{width:6px}textarea::-webkit-scrollbar-thumb{backgrou
  .top>#cnt{grid-column:2;grid-row:1}.top>#tSync{grid-column:3;grid-row:1}
 }
 .stbtn{position:sticky;top:0;z-index:3;display:inline-block;vertical-align:top;margin:0 6px 10px;min-height:30px;padding:4px 12px;font-size:12px;border-radius:999px;background:#fff;box-shadow:0 2px 8px rgba(20,58,75,.2)}
+.row #rev{flex:1 1 auto}.row #gen{flex:1.4 1 auto}
+#revNote{background:var(--teal3);border-right-color:var(--teal);color:var(--ink);margin-bottom:12px}
+#revNote ul{margin:6px 0 0;padding:0 18px 0 0}#revNote li{margin:2px 0}
+#revNote .btn{min-height:28px;padding:3px 12px;font-size:12px;margin-top:8px}
+@media(max-width:820px){.row #mic{flex:0 0 auto;min-width:0;padding-inline:10px}.row #rev{flex:1 1 0;min-width:0;padding-inline:6px;font-size:13px}.row #gen{flex:1.25 1 0;min-width:0;padding-inline:8px}}
 @media print{
 @page{size:A4;margin:0}
 html,body{height:auto!important;background:#fff!important;display:block!important}
-.top,.side,.stat,.toast,.pop,#arcView,#tplView,#tplBar,.modal,#mbar,#zoomBar,#mgTip,#syncModal,.stbtn,.mgs,.pbrk,.pn{display:none!important}
+.top,.side,.stat,.toast,.pop,#arcView,#tplView,#tplBar,.modal,#mbar,#zoomBar,#mgTip,#syncModal,#revNote,.stbtn,.mgs,.pbrk,.pn{display:none!important}
 .main{display:block!important}.stage{padding:0!important;background:none!important;overflow:visible!important}
 .wrap{transform:none!important;height:auto!important;width:210mm;margin:0!important}
 .a4{box-shadow:none!important;margin:0!important;page-break-after:always;break-after:page}
@@ -446,9 +451,10 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
 <aside class="side">
  <div class="sec"><h3><i>1</i>قول شن تبي</h3>
   <textarea id="topic" style="min-height:110px" placeholder="احكي أو اكتب بلهجتك، مثال: نبي نكلف محمد الفلاني يغطي زيارة رئيس الهيئة يوم الأحد ويدز المادة على صفحة المكتب"></textarea>
-  <div class="chips" id="ex"><span class="l">ابدأ بـ:</span><span class="chip" data-t="نبي نكلف ">تكليف</span><span class="chip" data-t="نبي خطاب شكر لـ ">شكر</span><span class="chip" data-t="نبي دعوة لـ ">دعوة</span><span class="chip" data-t="نبي نطلب من ">طلب</span><span class="chip" data-t="نبي نفيد المدير بخصوص ">إفادة للمدير</span></div><div class="row"><button class="btn alt" id="mic">🎙 تكلم</button><button class="btn" id="gen" style="flex:1">✦ حلل وصيغ</button></div>
-  <div class="hint">الذكاء يفهم الطلب، يختار نوع المراسلة والمرسل إليه بنفسه، ويكتب الصيغة الأفضل بأسلوبك. للمراسلات المتكررة استعمل تبويب «مراسلات معتادة».</div>
+  <div class="chips" id="ex"><span class="l">ابدأ بـ:</span><span class="chip" data-t="نبي نكلف ">تكليف</span><span class="chip" data-t="نبي خطاب شكر لـ ">شكر</span><span class="chip" data-t="نبي دعوة لـ ">دعوة</span><span class="chip" data-t="نبي نطلب من ">طلب</span><span class="chip" data-t="نبي نفيد المدير بخصوص ">إفادة للمدير</span></div><div class="row"><button class="btn alt" id="mic">🎙 تكلم</button><button class="btn alt" id="rev" type="button" title="يراجع النص اللي على الورقة إملائياً ونحوياً وصياغةً، والفكرة تبقى">✎ مراجعة وتعديل</button><button class="btn" id="gen" style="flex:1">✦ حلل وصيغ</button></div>
+  <div class="hint">الذكاء يفهم الطلب، يختار نوع المراسلة والمرسل إليه بنفسه، ويكتب الصيغة الأفضل بأسلوبك. للمراسلات المتكررة استعمل تبويب «مراسلات معتادة». كتبت أو عدّلت نص بيدك على الورقة؟ اضغط «مراجعة وتعديل» (فاضي = مراجعة عامة إملاء ونحو وصياغة، أو اكتب هنا تعليمة محددة مثل: اختصر، أضف فقرة).</div>
  </div>
+ <div class="hint" id="revNote" style="display:none"></div>
  <div class="hint" id="anNote" style="display:none;background:#e7f5ec;color:#17392b">✓ تم التحليل (قانونياً ولغوياً ونحوياً وصياغةً) في الخلفية، والمراسلة هي النسخة الأفضل بعد التحليل.</div>
  <div class="sec"><h3><i>2</i>التحرير</h3>
   <div class="tb row" id="qtb" style="margin-top:0"><button id="bB" title="عريض"><b>B</b> عريض</button><button id="bL" title="قائمة نقطية">• قائمة</button><button id="bC" title="توسيط">وسط</button><button id="bU" title="تراجع">تراجع</button><button id="bAI" title="عدّل جزء من النص بالذكاء" style="font-weight:700">✎ عدّل جزء بالذكاء</button></div>
@@ -689,6 +695,7 @@ async function gemGemini(file,user,temp){let key=getKey();if(!key){if(!setKey())
 const todayLine=()=>{const d=new Date(),q=n=>String(n).padStart(2,"0");return "[اليوم: "+WD[d.getDay()]+" "+d.getFullYear()+"/"+q(d.getMonth()+1)+"/"+q(d.getDate())+"م]"};
 async function api(path,body){
  if(STATIC){if(path=="/api/compose")return gem("prompts/system_prompt.md",todayLine()+String.fromCharCode(10)+body.text,0.4);
+  if(path=="/api/review")return gem("prompts/review_prompt.md",body.text,0.3);
   if(path=="/api/tplvars")return gem("prompts/tplvars_prompt.md",body.text,0.2);
   if(path=="/api/table")return gem("prompts/table_prompt.md",["السياق (المراسلة):",body.context,"","المطلوب: "+body.request].join(String.fromCharCode(10)),0.3);
   return gem("prompts/edit_prompt.md",["السياق (المراسلة كاملة):",body.context,"","الجزء المطلوب تعديله:",body.selection,"","الطلب: "+body.request].join(String.fromCharCode(10)),0.5)}
@@ -696,7 +703,7 @@ async function api(path,body){
  if(r.status==401){location.href="/login";throw new Error("login")}const j=await r.json();if(!r.ok)throw new Error(j.error||"خطأ");return j}
 $("#gen").onclick=async()=>{const v=$("#topic").value.trim();if(!v)return toast("احكي أو اكتب شن تبي أولاً");
  $("#gen").disabled=true;$("#gen").innerHTML='<span class="spin">⟳</span> يحلل ويكتب…';
- try{last=await api("/api/compose",{text:v});
+ try{last=await api("/api/compose",{text:v});LASTREQ=v;
   setBody(blocksToHtml(last.blocks||[]));CURID=null;autoArchive();
   if(Array.isArray(last.cc)&&last.cc.length){last.cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});cc=CC.filter(c=>last.cc.includes(c));renderCks();drawBottom()}
   $("#fit").click();showAn();toast("النوع: "+(last.type||""));if(innerWidth<=820)setTimeout(()=>$(".stage").scrollIntoView({behavior:"smooth"}),300)}
@@ -1077,6 +1084,31 @@ window.addEventListener("pointerup",()=>{if(!MGD)return;const k=MGD.k,v=MGD.v;MG
 $("#frGo").onclick=()=>{const f=$("#frF").value,r=$("#frR").value;if(!f)return toast("اكتب النص المراد البحث عنه");let n=0;
  const w=document.createTreeWalker(pagesEl,NodeFilter.SHOW_TEXT,{acceptNode:x=>x.parentElement&&x.parentElement.closest(".body")?1:2}),L=[];let x;while(x=w.nextNode())L.push(x);
  L.forEach(t=>{if(t.data.includes(f)){n+=t.data.split(f).length-1;t.data=t.data.split(f).join(r)}});if(n)layoutAll();toast(n?"تم استبدال "+n+" موضع":"ما لقيت النص (قد يكون مقسوماً بين خطّين مختلفين)")};
+/* ===== مراجعة وتعديل (إملاء + نحو + صياغة، والفكرة تبقى) ===== */
+let LASTREQ="",REVBK=null;
+function revBlocks(){const all=[];$$(".body").forEach(b=>all.push(...b.children));const L=[];
+ all.forEach((el,i)=>{if(el.classList.contains("pbrk")||el.tagName==="TABLE")return;
+  const role=el.classList.contains("to")?"to":el.classList.contains("gr")?"greeting":el.classList.contains("cl")?"closing":el.classList.contains("cx")?"farewell":/^(UL|OL)$/.test(el.tagName)?"list":"body";
+  let h=el.innerHTML;if(role==="closing")h=h.replace(/^\s*<b>[^<]*<\/b>\s*/,"");
+  h=h.replace(/<span class="n">([^<]*)<\/span>/g,"$1").replace(/<bdi[^>]*>|<\/bdi>/g,"").replace(/<span class="blank">[^<]*<\/span>/g,"{{فراغ}}");
+  if(h.replace(/<[^>]*>/g,"").trim())L.push({i,role,html:h})});return L}
+function revApply(res){const all=[];$$(".body").forEach(b=>all.push(...b.children));let n=0;
+ (res.blocks||[]).forEach(r=>{const el=all[r.i];if(!el||typeof r.html!=="string")return;
+  if(/^(UL|OL)$/.test(el.tagName)){el.innerHTML=dg(FRAG(r.html.replace(/<\/?[^>]*>/g,t=>/^<\/?(b|li)>$/i.test(t)?t:"")));n++;return}
+  const role=el.classList.contains("to")?"to":el.classList.contains("gr")?"greeting":el.classList.contains("cl")?"closing":el.classList.contains("cx")?"farewell":"body";
+  const tmp=document.createElement("div");tmp.innerHTML=blocksToHtml([{role,html:r.html}]);if(tmp.firstElementChild){el.innerHTML=tmp.firstElementChild.innerHTML;n++}});
+ (res.add||[]).forEach(a=>{const ref=all[a.after];if(!ref||!a.html)return;const tmp=document.createElement("div");tmp.innerHTML=blocksToHtml([{role:"body",html:a.html}]);if(tmp.firstElementChild){ref.after(tmp.firstElementChild);n++}});
+ return n}
+$("#rev").onclick=()=>withBusy("#rev",async()=>{const L=revBlocks();if(!L.length)return toast("اكتب أو ولّد مراسلة على الورقة أولاً");
+ const t=$("#topic").value.trim(),instr=(t&&t!==LASTREQ)?t:"";
+ const res=await api("/api/review",{text:JSON.stringify({instruction:instr,blocks:L})});
+ REVBK=getBody();const n=revApply(res||{});layoutAll();fitCheck();autoArchive();
+ const ch=(res&&Array.isArray(res.changes)?res.changes:[]).slice(0,6).map(x=>"<li>"+esc(x)+"</li>").join("");
+ const rn=$("#revNote");rn.style.display="block";
+ rn.innerHTML=(n?"✓ تمت المراجعة"+(instr?" وتنفيذ تعليمتك":"")+" ("+n+" موضع)":"✓ ما لقيت شي يحتاج تعديل")+(ch?"<ul>"+ch+"</ul>":"")+(n?'<button class="btn alt" id="revUndo" type="button">↶ رجّع قبل المراجعة</button>':"");
+ const u=$("#revUndo");if(u)u.onclick=()=>{if(REVBK==null)return;setBody(REVBK);autoArchive();rn.style.display="none";REVBK=null;toast("رجعت النص قبل المراجعة")};
+ if(instr)toast("نُفّذت تعليمتك"); else toast(n?"تمت المراجعة":"النص سليم");
+ if(innerWidth<=820)rn.scrollIntoView({behavior:"smooth",block:"center"})});
 const PD={sn:"عبدالرحيم أحمد شيتة",st:"رئيس قسم الإعلام",sw:"شيتة"},CC0=[...CC],CCSEL0=[...cc];
 let PREF_READY=false,prefTm=null;
 function prefsGet(){try{return JSON.parse(localStorage.getItem("awq_prefs")||"null")}catch(e){return null}}
