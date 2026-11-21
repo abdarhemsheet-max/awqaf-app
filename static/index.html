@@ -301,7 +301,7 @@ async function groqGem(file,user,temp){const key=getGrKey();if(!key){openKeys();
  const sys=await (await fetch(file)).text(),sel=lsGet("awq_grmodel"),ms=sel?[sel,...GRAUTO.filter(m=>m!==sel)]:GRAUTO;let err="";
  for(const m of ms){if(DEAD[m]>Date.now())continue;
   try{const r=await fx("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
-   body:JSON.stringify({model:m,messages:[{role:"system",content:sys},{role:"user",content:user}],temperature:temp==null?0.4:temp,response_format:{type:"json_object"}})});
+   body:JSON.stringify(Object.assign({model:m,messages:[{role:"system",content:sys},{role:"user",content:user}],temperature:temp==null?0.4:temp,response_format:{type:"json_object"}},m.startsWith("openai/gpt-oss")?{reasoning_effort:"low"}:{}))});
    if(!r.ok){const tx=await r.text();err=r.status==429?"⏳ Groq وصل حد الاستعمال، استنى شوية":"Groq "+r.status+": "+tx.slice(0,160);
     if(r.status==429&&/per day|TPD|RPD/i.test(tx))DEAD[m]=Date.now()+30*60000;
     if(r.status==401)throw new Error("مفتاح Groq غير صحيح");if(r.status==403)throw new Error(err);continue}
@@ -356,14 +356,15 @@ async function gemGemini(file,user,temp){let key=getKey();if(!key){if(!setKey())
  const sys=await (await fetch(file)).text();let err="",q429="";
  for(const m of modelList()){if(DEAD[m]>Date.now()){q429=q429||"PerDay";continue}
   try{const r=await fx("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
-   body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:{temperature:temp,responseMimeType:"application/json"}})});
+   body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:Object.assign({temperature:temp,responseMimeType:"application/json"},/^gemini-3/.test(m)?{thinkingConfig:{thinkingLevel:"minimal"}}:{})})});
    if(!r.ok){const tx=await r.text();err="Gemini "+r.status+": "+tx.slice(0,160);if(r.status==429){if(/PerDay/i.test(tx))DEAD[m]=Date.now()+30*60000;q429=q429.includes("PerDay")?q429:tx;continue}if(r.status==400||r.status==403)throw new Error(err);continue}
    const j=await r.json();const t=j.candidates[0].content.parts.filter(x=>x.text).map(x=>x.text).join("").trim().replace(/^```(?:json)?|```$/g,"").trim();const out=JSON.parse(t);cntAdd();return out}
   catch(e){if(/^Gemini 40[03]/.test(e.message))throw e;err=e.message}}
  if(q429)throw new Error(quotaMsg(q429));
  throw new Error(/abort/i.test(err)?"انتهت المهلة، أعد المحاولة بعد لحظات":(err||"تعذر الاتصال"))}
+const todayLine=()=>{const d=new Date(),q=n=>String(n).padStart(2,"0");return "[اليوم: "+WD[d.getDay()]+" "+d.getFullYear()+"/"+q(d.getMonth()+1)+"/"+q(d.getDate())+"م]"};
 async function api(path,body){
- if(STATIC){if(path=="/api/compose")return gem("prompts/system_prompt.md",body.text,0.4);
+ if(STATIC){if(path=="/api/compose")return gem("prompts/system_prompt.md",todayLine()+String.fromCharCode(10)+body.text,0.4);
   if(path=="/api/tplvars")return gem("prompts/tplvars_prompt.md",body.text,0.2);
   if(path=="/api/table")return gem("prompts/table_prompt.md",["السياق (المراسلة):",body.context,"","المطلوب: "+body.request].join(String.fromCharCode(10)),0.3);
   return gem("prompts/edit_prompt.md",["السياق (المراسلة كاملة):",body.context,"","الجزء المطلوب تعديله:",body.selection,"","الطلب: "+body.request].join(String.fromCharCode(10)),0.5)}

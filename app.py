@@ -67,8 +67,11 @@ def gemini(system, user, temperature=0.4):
     last = "تعذر الاتصال بـ Gemini"
     for m in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent"
+        gc = dict(body["generationConfig"])
+        if m.startswith("gemini-3"):
+            gc["thinkingConfig"] = {"thinkingLevel": "minimal"}  # أسرع بكثير للكتابة الإدارية
         try:
-            r = requests.post(url, params={"key": GEMINI_KEY}, json=body, timeout=60)
+            r = requests.post(url, params={"key": GEMINI_KEY}, json={**body, "generationConfig": gc}, timeout=60)
         except requests.RequestException as e:
             last = f"Gemini: {e}"
             continue
@@ -85,6 +88,13 @@ def gemini(system, user, temperature=0.4):
         except (KeyError, IndexError, ValueError) as e:
             last = f"رد غير صالح من {m}: {e}"
     raise RuntimeError(last)
+
+def today_line():
+    """تاريخ اليوم (بتوقيت ليبيا UTC+2) ليحسب الذكاء «الأحد القادم» وأمثالها."""
+    from datetime import datetime, timedelta, timezone
+    d = datetime.now(timezone.utc) + timedelta(hours=2)
+    days = ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
+    return f"[اليوم: {days[d.weekday()]} {d.year}/{d.month:02d}/{d.day:02d}م]"
 
 MOCK_LETTER = {
     "type": "تكليف",
@@ -106,7 +116,7 @@ def compose():
     if not text:
         return jsonify(error="النص فارغ"), 400
     try:
-        return jsonify(MOCK_LETTER if MOCK else gemini(SYSTEM, text))
+        return jsonify(MOCK_LETTER if MOCK else gemini(SYSTEM, today_line() + "\n" + text))
     except Exception as e:
         return jsonify(error=str(e)), 500
 
