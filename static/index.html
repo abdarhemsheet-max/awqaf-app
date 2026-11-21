@@ -298,7 +298,7 @@ $("#keyModal").addEventListener("click",e=>{if(e.target.id==="keyModal")$("#keyM
 $("#kClear").onclick=()=>{["awq_gkey","awq_grkey","awq_ckey"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});$("#kG").value="";$("#kR").value="";$("#kC").value="";toast("مسحت المفاتيح المحفوظة")};
 $("#mdlBtn").onclick=openKeys;updProv();
 async function groqGem(file,user,temp){const key=getGrKey();if(!key){openKeys();throw new Error("ضع مفتاح Groq أولاً")}
- const sys=await (await fetch(file)).text(),sel=lsGet("awq_grmodel"),ms=sel?[sel,...GRAUTO.filter(m=>m!==sel)]:GRAUTO;let err="";
+ const sys=await (await fetch(file,{cache:"no-cache"})).text(),sel=lsGet("awq_grmodel"),ms=sel?[sel,...GRAUTO.filter(m=>m!==sel)]:GRAUTO;let err="";
  for(const m of ms){if(DEAD[m]>Date.now())continue;
   try{const r=await fx("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
    body:JSON.stringify(Object.assign({model:m,messages:[{role:"system",content:sys},{role:"user",content:user}],temperature:temp==null?0.4:temp,response_format:{type:"json_object"}},m.startsWith("openai/gpt-oss")?{reasoning_effort:"low"}:{}))});
@@ -318,7 +318,7 @@ async function groqWhisper(blob,type){const key=getGrKey(),ext=/mp4|m4a|aac/.tes
   catch(e){if(/غير صحيح/.test(e.message))throw e;err=e.message}}
  throw new Error(err||"تعذر التفريغ")}
 async function claudeGem(file,user){const key=getCKey();if(!key){openKeys();throw new Error("ضع مفتاح Claude أولاً")}
- const sys=await (await fetch(file)).text(),sel=lsGet("awq_cmodel"),ms=sel?[sel,...CAUTO.filter(m=>m!==sel)]:CAUTO;let err="";
+ const sys=await (await fetch(file,{cache:"no-cache"})).text(),sel=lsGet("awq_cmodel"),ms=sel?[sel,...CAUTO.filter(m=>m!==sel)]:CAUTO;let err="";
  for(const m of ms){
   try{const r=await fx("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
    body:JSON.stringify({model:m,max_tokens:4096,system:sys,messages:[{role:"user",content:user}]})});
@@ -353,7 +353,7 @@ async function gem(file,user,temp){const p=getProv(),others=["gemini","groq","cl
  for(let k=0;k<order.length;k++){try{return await callProv(order[k],file,user,temp)}catch(e){if(!first)first=e;if(k<order.length-1)toast("تحوّل تلقائي من "+PNAME[order[k]]+" إلى "+PNAME[order[k+1]])}}
  throw first}
 async function gemGemini(file,user,temp){let key=getKey();if(!key){if(!setKey())throw new Error("لازم مفتاح Gemini");key=getKey()}
- const sys=await (await fetch(file)).text();let err="",q429="";
+ const sys=await (await fetch(file,{cache:"no-cache"})).text();let err="",q429="";
  for(const m of modelList()){if(DEAD[m]>Date.now()){q429=q429||"PerDay";continue}
   try{const r=await fx("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
    body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:Object.assign({temperature:temp,responseMimeType:"application/json"},/^gemini-3/.test(m)?{thinkingConfig:{thinkingLevel:"minimal"}}:{})})});
