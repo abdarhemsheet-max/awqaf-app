@@ -24,7 +24,7 @@ TABLE = read("prompts/table_prompt.md")
 LOGIN = """<!doctype html><html lang=ar dir=rtl><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>دخول</title><body style="font-family:sans-serif;background:#eef1ee;display:grid;place-items:center;height:100vh;margin:0">
 <form method=post style="background:#fff;padding:26px;border-radius:14px;box-shadow:0 4px 18px #0002;width:300px;text-align:center">
-<h2 style="color:#17392b;margin-top:0">مراسلات الأوقاف</h2>
+<h2 style="color:#1b4b5f;margin-top:0">مراسلاتي</h2>
 <input type=password name=p placeholder="كلمة المرور" autofocus style="width:100%;padding:10px;font-size:16px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box">
 <button style="margin-top:12px;width:100%;padding:10px;font-size:16px;background:#2d6a4f;color:#fff;border:0;border-radius:8px">دخول</button>
 <p style="color:#b3261e;font-size:13px">{{e}}</p></form>"""
