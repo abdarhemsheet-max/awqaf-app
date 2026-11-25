@@ -105,7 +105,7 @@ details.grp label:not(.ck){margin-top:6px}
 .body .cx{text-align:var(--cxAlign,center);font-weight:700;font-size:var(--fsCx,var(--fs2));margin-top:var(--gCx,5mm)}
 .body li{font-size:var(--fs);line-height:var(--lh);margin:0 0 1mm}
 .body ul{margin:0 0 2mm;padding:0 7mm 0 0;list-style:none}.body ul>li::before{content:"– "}
-.n{font-family:"Amiri","Noto Naskh Arabic",serif!important}
+.n,.n .__w{font-family:"Amiri","Noto Naskh Arabic",serif!important}
 .blank{background:#fff7d6;border-radius:3px}
 .sp{flex:1;min-height:0}
 .bot{display:flex;justify-content:space-between;align-items:flex-end}
@@ -798,6 +798,7 @@ function layout(sig){
  const blocks=[];$$(".body").forEach(b=>blocks.push(...b.children));blocks.forEach(b=>b.remove());pagesEl.innerHTML="";
  let i=0,page,body;const add=()=>{page=mkPage(i);pagesEl.appendChild(page);page.querySelector(".bot").style.display=i===sig?"flex":"none";body=page.querySelector(".body")};add();
  let brk=false;for(const b of blocks){if(brk){i++;add();brk=false}body.appendChild(b);if(b.classList&&b.classList.contains("pbrk")){brk=true;continue}if(body.offsetHeight>avail(page)&&body.children.length>1){body.removeChild(b);i++;add();body.appendChild(b)}}
+ while(sig>i){i++;add()} // النص يملأ صفحة بدون التوقيع ولا يتسع معه: التوقيع و«صورة إلى» في صفحة جديدة بدل أن يختفيا
  return i+1}
 function saveCaret(){const s=getSelection();if(!s.rangeCount)return null;const bs=$$(".body");const bd=bs.find(b=>b.contains(s.anchorNode));if(!bd)return null;
  const all=[];bs.forEach(b=>all.push(...b.children));const blk=all.find(x=>x.contains(s.anchorNode));if(!blk)return null;
@@ -896,35 +897,31 @@ const dlBlob=(b,n)=>{const a=document.createElement("a");a.href=URL.createObject
 function pdfName(){const d=new Date(),t=((last&&last.type)||"مراسلة").replace(/[\\\/:*?"<>|]+/g,"").trim().replace(/\s+/g,"_");return t+"_"+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+".pdf"}
 /* ===== طبقة النص للـPDF: كل سطر يُرسم كاملاً بمحرك المتصفح (يحل تكسّر الحروف والتنوين في Safari) ===== */
 const SAFWK=/AppleWebKit/.test(navigator.userAgent)&&!/Chrome\/|Edg\//.test(navigator.userAgent);
+// كل كلمة تُلفّ مؤقتاً في span فيقيس المتصفح موضعها بدقة (قياس الحروف داخل Range غير موثوق في Safari الآيفون)
+function pdfWords(page){const W=document.createTreeWalker(page,NodeFilter.SHOW_TEXT,{acceptNode:t=>{if(!t.data.trim())return 2;const e=t.parentElement;
+  return !e||e.closest(".ph,.pn,.mgs,.pbrk,.__w,style,script")?2:1}});const ns=[];let t;while(t=W.nextNode())ns.push(t);
+ ns.forEach(t=>{const f=document.createDocumentFragment();t.data.split(/(\s+)/).forEach(x=>{if(!x)return;if(/^\s+$/.test(x)){f.appendChild(document.createTextNode(x));return}
+  const sp=document.createElement("span");sp.className="__w";sp.textContent=x;f.appendChild(sp)});t.replaceWith(f)})}
+function pdfUnwords(){const ps=new Set();$$(".__w").forEach(sp=>{ps.add(sp.parentNode);sp.replaceWith(document.createTextNode(sp.textContent))});ps.forEach(p=>p&&p.normalize())}
 function pdfTextLayer(ctx,page,k){const pr=page.getBoundingClientRect(),sc=SC||1;ctx.save();ctx.setTransform(k,0,0,k,0,0);
- const W=document.createTreeWalker(page,NodeFilter.SHOW_TEXT,{acceptNode:t=>{if(!t.data.trim())return 2;const e=t.parentElement;if(!e||e.closest(".ph,.pn,.mgs,.pbrk"))return 2;
-  const c=getComputedStyle(e);return c.visibility==="hidden"||c.display==="none"?2:1}});
- const rg=document.createRange(),R=(n,a,b)=>{rg.setStart(n,a);rg.setEnd(n,b);return rg.getBoundingClientRect()};
- let t;while(t=W.nextNode()){const e=t.parentElement,c=getComputedStyle(e),L=t.data.length;
-  ctx.font=`${c.fontStyle} ${c.fontWeight} ${c.fontSize} ${c.fontFamily}`;ctx.direction=c.direction==="ltr"?"ltr":"rtl";ctx.fillStyle=c.color&&c.color!=="rgba(0, 0, 0, 0)"?c.color:"#000";
-  const sw=parseFloat(c.webkitTextStrokeWidth)||0;
-  // تقسيم العقدة إلى أسطر بحسب موضع كل حرف
-  const segs=[];let st=0,top=null;
-  for(let i=0;i<L;i++){const ch=t.data[i];if(/[\s\p{M}ـ]/u.test(ch))continue;const r=R(t,i,i+1);if(!r.width&&!r.height)continue;const y=(r.top+r.bottom)/2;
-   if(top===null){top=y;st=i;continue}if(Math.abs(y-top)>r.height*0.6){segs.push([st,i]);st=i;top=y}}
-  if(top!==null)segs.push([st,L]);
-  for(const [a,b] of segs){let s0=a,e0=b;while(s0<e0&&/\s/.test(t.data[s0]))s0++;while(e0>s0&&/\s/.test(t.data[e0-1]))e0--;if(e0<=s0)continue;
-   // Safari: خط سلطان بلا تنوين/شدة، ورسم كلمة فيها حركة يقلبها لخط بديل ويطيّرها؛ نحذف الحركات كما يفعل Safari على الشاشة
-   const txt=(SAFWK&&/Sultan/i.test(c.fontFamily)?t.data.slice(s0,e0).replace(/[ً-ْ]/g,""):t.data.slice(s0,e0)),r=R(t,s0,e0),x0=(r.left-pr.left)/sc,x1=(r.right-pr.left)/sc,y0=(r.top-pr.top)/sc,wd=x1-x0;
-   const m=ctx.measureText(txt),asc=m.fontBoundingBoxAscent||parseFloat(c.fontSize)*.8,dsc=m.fontBoundingBoxDescent||parseFloat(c.fontSize)*.25,h=(r.height/sc);
-   const base=y0+(h-(asc+dsc))/2+asc,rtl=ctx.direction==="rtl";
-   const draw=(w,x)=>{ctx.textAlign=rtl?"right":"left";ctx.fillText(w,x,base);if(sw){ctx.lineWidth=sw;ctx.strokeStyle=ctx.fillStyle;ctx.strokeText(w,x,base)}};
-   const words=txt.split(/\s+/);
-   if(words.length>1&&wd-m.width>1.5){const ws=words.map(w=>ctx.measureText(w).width),gap=(wd-ws.reduce((a,b)=>a+b,0))/(words.length-1);
-    let x=rtl?x1:x0;words.forEach((w,i)=>{draw(w,x);x+=(rtl?-1:1)*(ws[i]+gap)})}
-   else draw(txt,rtl?x1:x0);
-   if(/underline/.test(c.textDecorationLine)){ctx.fillRect(x0,base+Math.max(1,dsc*.35),wd,Math.max(.6,parseFloat(c.fontSize)/18))}}}
+ page.querySelectorAll(".__w").forEach(sp=>{const c=getComputedStyle(sp);if(c.visibility==="hidden"||c.display==="none")return;
+  const rs=sp.getClientRects();if(!rs.length)return;const r=rs[0];if(!r.width||!r.height)return;
+  const ff=getComputedStyle(sp.closest(".n")||sp).fontFamily; // \u0627\u0644\u0623\u0631\u0642\u0627\u0645 \u0627\u0644\u0644\u0627\u062A\u064A\u0646\u064A\u0629: \u062E\u0637 Amiri \u0645\u0646 .n
+  let txt=sp.textContent;if(SAFWK&&/Sultan/i.test(ff))txt=txt.replace(/[\u064B-\u0652]/g,"");if(!txt.trim())return;
+  ctx.font=`${c.fontStyle} ${c.fontWeight} ${c.fontSize} ${ff}`;ctx.direction=c.direction==="ltr"?"ltr":"rtl";ctx.textAlign="left";
+  ctx.fillStyle=c.color&&c.color!=="rgba(0, 0, 0, 0)"?c.color:"#000";
+  const x0=(r.left-pr.left)/sc,wd=r.width/sc,y0=(r.top-pr.top)/sc,h=r.height/sc,fs=parseFloat(c.fontSize);
+  const m=ctx.measureText(txt),asc=m.fontBoundingBoxAscent||fs*.8,dsc=m.fontBoundingBoxDescent||fs*.25,base=y0+(h-(asc+dsc))/2+asc;
+  // الكلمة تُرسم داخل صندوقها بالضبط: لو اختلف عرض الرسم عن عرض الشاشة تُضغط/تُمد أفقياً فلا تتداخل الكلمات أبداً
+  const ratio=m.width>0?wd/m.width:1;ctx.save();ctx.translate(x0,base);if(Math.abs(ratio-1)>.01)ctx.scale(ratio,1);ctx.fillText(txt,0,0);
+  const sw=parseFloat(c.webkitTextStrokeWidth)||0;if(sw){ctx.lineWidth=sw;ctx.strokeStyle=ctx.fillStyle;ctx.strokeText(txt,0,0)}ctx.restore();
+  if(/underline/.test(c.textDecorationLine))ctx.fillRect(x0,base+Math.max(1,dsc*.35),wd,Math.max(.6,fs/18))});
  ctx.restore()}
 // علامات القوائم (– و 1-) تصير نصاً حقيقياً أثناء التصدير حتى تُرسم بنفس الطبقة
 function pdfMarkers(on){if(on){$("#wrap").classList.add("exporting");$$(".body ul>li").forEach(li=>li.insertAdjacentHTML("afterbegin",'<span class="__mk">– </span>'));
  $$(".body ol").forEach(ol=>[...ol.children].forEach((li,i)=>li.insertAdjacentHTML("afterbegin",'<span class="__mk n">'+(i+1)+'- </span>')))}
  else{$$(".body .__mk").forEach(x=>x.remove());$("#wrap").classList.remove("exporting")}}
-async function pagesToPdf(pdf){clearAiHl();await document.fonts.ready;if($("#mainView").classList.contains("hid")){view(1);await new Promise(r=>setTimeout(r,350))}pdfMarkers(true);try{
+async function pagesToPdf(pdf){clearAiHl();await document.fonts.ready;if($("#mainView").classList.contains("hid")){view(1);await new Promise(r=>setTimeout(r,350))}pdfMarkers(true);$$(".a4").forEach(pdfWords);try{
  if(!window.html2canvas)throw new Error("مكتبة PDF ما تحملت");
  const pages=$$(".a4"),wcls=$("#wrap").className.replace(/\b(mgmode|tplmode)\b/g,""),lhv=pagesEl.getAttribute("style")||"";
  for(let i=0;i<pages.length;i++){
@@ -934,7 +931,7 @@ async function pagesToPdf(pdf){clearAiHl();await document.fonts.ready;if($("#mai
     el.style.boxShadow="none";el.style.margin="0";
     d.querySelectorAll(".ph,.pn,.mgs,.pbrk").forEach(x=>x.style.visibility="hidden");d.querySelectorAll(".blank,.aihl").forEach(x=>x.style.background="none");d.querySelectorAll(".pg,.pg *").forEach(x=>{x.style.color="transparent";x.style.webkitTextStroke="0"})}});
   pdfTextLayer(cv.getContext("2d"),pages[i],3);
-  if(pdf._cnt)pdf.addPage([210,296.6]);pdf._cnt=(pdf._cnt||0)+1;pdf.addImage(cv.toDataURL("image/jpeg",.94),"JPEG",0,0,210,296.6)}}finally{pdfMarkers(false)}}
+  if(pdf._cnt)pdf.addPage([210,296.6]);pdf._cnt=(pdf._cnt||0)+1;pdf.addImage(cv.toDataURL("image/jpeg",.94),"JPEG",0,0,210,296.6)}}finally{pdfUnwords();pdfMarkers(false)}}
 const newPdf=()=>{if(!window.jspdf)throw new Error("مكتبة PDF ما تحملت");return new window.jspdf.jsPDF({unit:"mm",format:[210,296.6],orientation:"portrait",compress:true})};
 async function makePDF(){const pdf=newPdf(),name=pdfName();try{pdf.setProperties({title:name.replace(/\.pdf$/,""),creator:"مراسلاتي"})}catch(e){}await pagesToPdf(pdf);return {blob:pdf.output("blob"),name}}
 async function withBusy(id,fn){const b=$(id),o=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin">⟳</span> يجهّز…';try{await fn()}catch(e){toast("تعذر: "+e.message)}b.disabled=false;b.innerHTML=o}
