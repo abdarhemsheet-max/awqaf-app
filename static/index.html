@@ -104,7 +104,7 @@ details.grp label:not(.ck){margin-top:6px}
 .body .cl{text-align:var(--clAlign,center);margin-top:var(--gCl,4mm);font-size:var(--fsCl,var(--fs))}
 .body .cx{text-align:var(--cxAlign,center);font-weight:700;font-size:var(--fsCx,var(--fs2));margin-top:var(--gCx,5mm)}
 .body li{font-size:var(--fs);line-height:var(--lh);margin:0 0 1mm}
-.body ul{margin:0 0 2mm;padding:0 7mm 0 0;list-style:"– "}
+.body ul{margin:0 0 2mm;padding:0 7mm 0 0;list-style:none}.body ul>li::before{content:"– "}
 .n{font-family:"Amiri","Noto Naskh Arabic",serif!important}
 .blank{background:#fff7d6;border-radius:3px}
 .sp{flex:1;min-height:0}
@@ -687,7 +687,7 @@ async function gemGemini(file,user,temp){let key=getKey();if(!key){if(!setKey())
  const sys=await (await fetch(file,{cache:"no-cache"})).text();let err="",q429="";
  for(const m of modelList()){if(DEAD[m]>Date.now()){q429=q429||"PerDay";continue}
   try{const r=await fx("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
-   body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:Object.assign({temperature:temp,responseMimeType:"application/json"},/^gemini-3/.test(m)?{thinkingConfig:{thinkingLevel:"minimal"}}:{})})});
+   body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:Object.assign({temperature:temp,responseMimeType:"application/json"},/^gemini-3/.test(m)?{thinkingConfig:{thinkingLevel:/system_prompt|review_prompt/.test(file)?"low":"minimal"}}:{})})});
    if(!r.ok){const tx=await r.text();err="Gemini "+r.status+": "+tx.slice(0,160);if(r.status==429){if(/PerDay/i.test(tx))DEAD[m]=Date.now()+30*60000;q429=q429.includes("PerDay")?q429:tx;continue}if(r.status==400||r.status==403)throw new Error(err);continue}
    const j=await r.json();const t=j.candidates[0].content.parts.filter(x=>x.text).map(x=>x.text).join("").trim().replace(/^```(?:json)?|```$/g,"").trim();const out=JSON.parse(t);cntAdd();return out}
   catch(e){if(/^Gemini 40[03]/.test(e.message))throw e;err=e.message}}
@@ -905,7 +905,7 @@ async function pagesToPdf(pdf){clearAiHl();await document.fonts.ready;
     d.querySelectorAll(".ph,.pn,.mgs,.pbrk").forEach(x=>x.style.visibility="hidden");d.querySelectorAll(".blank,.aihl").forEach(x=>x.style.background="none")}});
   if(pdf._cnt)pdf.addPage([210,296.6]);pdf._cnt=(pdf._cnt||0)+1;pdf.addImage(cv.toDataURL("image/jpeg",.94),"JPEG",0,0,210,296.6)}}
 const newPdf=()=>{if(!window.jspdf)throw new Error("مكتبة PDF ما تحملت");return new window.jspdf.jsPDF({unit:"mm",format:[210,296.6],orientation:"portrait",compress:true})};
-async function makePDF(){const pdf=newPdf();await pagesToPdf(pdf);return {blob:pdf.output("blob"),name:pdfName()}}
+async function makePDF(){const pdf=newPdf(),name=pdfName();try{pdf.setProperties({title:name.replace(/\.pdf$/,""),creator:"مراسلاتي"})}catch(e){}await pagesToPdf(pdf);return {blob:pdf.output("blob"),name}}
 async function withBusy(id,fn){const b=$(id),o=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin">⟳</span> يجهّز…';try{await fn()}catch(e){toast("تعذر: "+e.message)}b.disabled=false;b.innerHTML=o}
 $("#pdf").onclick=()=>withBusy("#pdf",async()=>{const r=await makePDF();dlBlob(r.blob,r.name);toast("تم تنزيل "+r.name)});
 let WAP=null;const waSig=()=>getBody()+"|"+cc.join(",")+"|"+(pagesEl.getAttribute("style")||"")+"|"+$("#sn").value+$("#st").value+"|"+$("#wrap").className;

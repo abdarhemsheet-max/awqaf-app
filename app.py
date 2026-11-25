@@ -55,7 +55,7 @@ def login():
 def index():
     return send_from_directory("static", "index.html")
 
-def gemini(system, user, temperature=0.4):
+def gemini(system, user, temperature=0.4, thinking="minimal"):
     if not GEMINI_KEY:
         raise RuntimeError("GEMINI_API_KEY غير مضبوط")
     body = {
@@ -70,7 +70,7 @@ def gemini(system, user, temperature=0.4):
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent"
         gc = dict(body["generationConfig"])
         if m.startswith("gemini-3"):
-            gc["thinkingConfig"] = {"thinkingLevel": "minimal"}  # أسرع بكثير للكتابة الإدارية
+            gc["thinkingConfig"] = {"thinkingLevel": thinking}  # minimal للسرعة، low للمراسلة والمراجعة (جودة أعلى)
         try:
             r = requests.post(url, params={"key": GEMINI_KEY}, json={**body, "generationConfig": gc}, timeout=60)
         except requests.RequestException as e:
@@ -117,7 +117,7 @@ def compose():
     if not text:
         return jsonify(error="النص فارغ"), 400
     try:
-        return jsonify(MOCK_LETTER if MOCK else gemini(SYSTEM, today_line() + "\n" + text))
+        return jsonify(MOCK_LETTER if MOCK else gemini(SYSTEM, today_line() + "\n" + text, 0.4, "low"))
     except Exception as e:
         return jsonify(error=str(e)), 500
 
@@ -201,7 +201,7 @@ def review():
     try:
         if MOCK:
             return jsonify(blocks=[], add=[], changes=["ما لقيت أخطاء، النص سليم"])
-        return jsonify(gemini(REVIEW, text, 0.3))
+        return jsonify(gemini(REVIEW, text, 0.3, "low"))
     except Exception as e:
         return jsonify(error=str(e)), 500
 
