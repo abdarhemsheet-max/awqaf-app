@@ -94,7 +94,7 @@ details.grp label:not(.ck){margin-top:6px}
 .ph{position:absolute;right:0;left:0;color:#c5c5c5;font:11px sans-serif;text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.8}
 .ph.h{top:0;height:46mm;background:repeating-linear-gradient(135deg,#fafafa 0 8px,#fff 8px 16px)}
 .ph.f{bottom:0;height:20mm;background:repeating-linear-gradient(135deg,#fafafa 0 8px,#fff 8px 16px)}
-.pg{position:absolute;top:var(--mt,50mm);bottom:calc(var(--mb,22mm) + var(--safe,5mm));right:var(--mr,25mm);left:var(--ml,25mm);display:flex;flex-direction:column;color:#000;font-family:"Sultan","Noto Naskh Arabic",serif}
+.pg{position:absolute;top:var(--mt,50mm);bottom:var(--mb,22mm);right:var(--mr,25mm);left:var(--ml,25mm);display:flex;flex-direction:column;color:#000;font-family:"Sultan","Noto Naskh Arabic",serif}
 .pg *{font-family:"Sultan","Noto Naskh Arabic",serif}
 .pg b{font-weight:700}
 .body{outline:none;display:flow-root}
@@ -871,7 +871,7 @@ function setLHBase(v){LHB=+v;FMT.lh=+v;setLH(v)}
 $("#lh").oninput=e=>{setLHBase(e.target.value);FMTID=null;fmtSelRender();layoutAll();autoSave()};
 $("#sigSel").onchange=e=>{sigChoice=e.target.value;layoutAll()};
 let QUIET=true;
-const FMT0={fs:15,fsTo:16.5,fsGr:16.5,fsCl:15,fsCx:16.5,fsSig:17,fsCc:8,lh:2,gap:2,gGr:5,gCl:4,gCx:5,sigUp:19,mt:50,mb:22,safe:5,mr:25,ml:25,just:true,ctrCl:true,ctrCx:true,showCc:true,showSig:true,showTyp:true,auto:false};
+const FMT0={fs:15,fsTo:16.5,fsGr:16.5,fsCl:15,fsCx:16.5,fsSig:17,fsCc:8,lh:2,gap:2,gGr:5,gCl:4,gCx:5,sigUp:19,mt:50,mb:22,mr:25,ml:25,just:true,ctrCl:true,ctrCx:true,showCc:true,showSig:true,showTyp:true,auto:false};
 const FMT_BUILTIN=[
  {id:"max",name:"أكبر خط في صفحة واحدة (هوامش 15/12، تباعد 1.3)",f:{mr:15,ml:12,lh:1.3,auto:true}},
  {id:"prev",name:"الورقة السابقة (متن 15pt، تباعد 2)",f:{}},
@@ -881,7 +881,7 @@ let FMT={...FMT0},FMTID="prev";
 const FCTL=[
  {ic:"Aa",g:"أحجام الخطوط",sub:"المتن والمرسل إليه والتحية والختام والتوقيع",items:[["fs","خط المتن (يحرّك الباقي معه)",11,26,.5,"pt"],["fsTo","المرسل إليه",11,28,.5,"pt"],["fsGr","التحية",11,28,.5,"pt"],["fsCl","سطر «عليه»",11,26,.5,"pt"],["fsCx","الخاتمة",11,28,.5,"pt"],["fsSig","الاسم والمسمى",11,28,.5,"pt"],["fsCc","«صورة إلى»",6,12,.5,"pt"]]},
  {ic:"↕",g:"المسافات",sub:"بين الفقرات وقبل «عليه» والخاتمة ورفع التوقيع",items:[["gap","بين الفقرات",0,12,.5,"مم"],["gGr","قبل التحية",0,15,.5,"مم"],["gCl","قبل «عليه»",0,15,.5,"مم"],["gCx","قبل الخاتمة",0,15,.5,"مم"],["sigUp","رفع التوقيع عن الأسفل",0,40,1,"مم"]]},
- {ic:"▢",g:"الهوامش",sub:"العلوي والسفلي واليمين واليسار (أو اسحبها من الورقة)",items:[["mt","العلوي (تحت الترويسة)",30,80,1,"مم"],["mb","السفلي",10,45,1,"مم"],["mr","اليمين",10,45,1,"مم"],["ml","اليسار",10,45,1,"مم"],["safe","مساحة أمان فوق الشريط السفلي",0,20,1,"مم"]],note:"الورقة المطبوعة مسبقاً لها هوامش ثابتة (فوق 50، تحت 22، جانبين 25 مم). غيّرها للضرورة فقط. «مساحة الأمان» فراغ زيادة فوق الهامش السفلي حتى لا يقرب آخر سطر من شريط العناوين المطبوع (لو الطابعة تزحزح الورقة)."},
+ {ic:"▢",g:"الهوامش",sub:"العلوي والسفلي واليمين واليسار (أو اسحبها من الورقة)",items:[["mt","العلوي (تحت الترويسة)",30,80,1,"مم"],["mb","السفلي",10,45,1,"مم"],["mr","اليمين",10,45,1,"مم"],["ml","اليسار",10,45,1,"مم"]],note:"الورقة المطبوعة مسبقاً لها هوامش ثابتة (فوق 50، تحت 22، جانبين 25 مم). غيّرها للضرورة فقط."},
  {ic:"☰",g:"المحاذاة والإظهار",sub:"ضبط النص وتوسيط الأسطر وإظهار العناصر",tog:[["just","ضبط النص (محاذاة الطرفين)"],["ctrCl","توسيط سطر «عليه»"],["ctrCx","توسيط الخاتمة"],["showCc","إظهار «صورة إلى»"],["showSig","إظهار الاسم والمسمى"],["showTyp","إظهار سطر الكاتب والتاريخ"]]}];
 const FR={};FCTL.forEach(g=>(g.items||[]).forEach(([k,t,mn,mx])=>FR[k]=[mn,mx]));
 function fmtUserLoad(){try{const L=JSON.parse(localStorage.getItem("awq_fmt")||"[]");return Array.isArray(L)?L:[]}catch(e){return[]}}
@@ -899,7 +899,7 @@ function fmtUI(){FCTL.forEach(g=>{(g.items||[]).forEach(([k])=>{const e=$("#f_"+
 function fmtApply(save){const st=pagesEl.style,F=FMT,mm=v=>v+"mm",pt=v=>v+"pt";
  st.setProperty("--fs",pt(F.fs));st.setProperty("--fsTo",pt(F.fsTo));st.setProperty("--fsGr",pt(F.fsGr));st.setProperty("--fsCl",pt(F.fsCl));st.setProperty("--fsCx",pt(F.fsCx));st.setProperty("--fsSig",pt(F.fsSig));st.setProperty("--fsCc",pt(F.fsCc));
  st.setProperty("--pgap",mm(F.gap));st.setProperty("--gGr",mm(F.gGr));st.setProperty("--gCl",mm(F.gCl));st.setProperty("--gCx",mm(F.gCx));st.setProperty("--sigUp",mm(F.sigUp));
- st.setProperty("--mt",mm(F.mt));st.setProperty("--mb",mm(F.mb));st.setProperty("--safe",mm(F.safe==null?5:F.safe));st.setProperty("--mr",mm(F.mr));st.setProperty("--ml",mm(F.ml));
+ st.setProperty("--mt",mm(F.mt));st.setProperty("--mb",mm(F.mb));st.setProperty("--mr",mm(F.mr));st.setProperty("--ml",mm(F.ml));
  st.setProperty("--clAlign",F.ctrCl?"center":"right");st.setProperty("--cxAlign",F.ctrCx?"center":"right");
  const w=$("#wrap").classList;w.toggle("ragged",!F.just);w.toggle("nocc",!F.showCc);w.toggle("nosig",!F.showSig);w.toggle("notyp",!F.showTyp);
  fmtUI();layoutAll();if(save){autoSave();if(CURID!=null)autoArchive()}}
