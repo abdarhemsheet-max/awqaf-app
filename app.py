@@ -17,6 +17,8 @@ FALLBACK_MODELS = ["gemini-3.1-flash-lite", "gemini-flash-latest"]
 PASSWORD = "" if LOCAL else os.environ.get("APP_PASSWORD", "")
 MOCK = os.environ.get("MOCK") == "1"
 ARCHIVE = os.path.join(BASE, "archive")
+SB_URL = os.environ.get("SUPABASE_URL", "https://qpindseciwxoageaqdtf.supabase.co")
+SB_KEY = os.environ.get("SUPABASE_ANON_KEY", "sb_publishable_OpnTN4pma05OquJKtZPuDg_2e-m5HM7")
 WIN = sys.platform == "win32"
 
 def read(p):
@@ -69,9 +71,9 @@ def login():
 @app.route("/")
 @need_login
 def index():
-    r = send_from_directory("static", "index.html")
-    r.headers["Cache-Control"] = "no-store"
-    return r
+    # مزامنة الأرشيف مع الهاتف: نفس مشروع Supabase اللي في الموقع (الرابط والمفتاح العام publishable، ليسا سرّاً)
+    html = read("static/index.html").replace("__SB_URL__", SB_URL).replace("__SB_KEY__", SB_KEY)
+    return html, 200, {"Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store"}
 
 @app.route("/prompts/<path:p>")
 def prompts_file(p):
