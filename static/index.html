@@ -433,6 +433,18 @@ textarea::-webkit-scrollbar{width:6px}textarea::-webkit-scrollbar-thumb{backgrou
 #revNote ul{margin:6px 0 0;padding:0 18px 0 0}#revNote li{margin:2px 0}
 #revNote .btn{min-height:28px;padding:3px 12px;font-size:12px;margin-top:8px}
 @media(max-width:820px){.row #mic{flex:0 0 auto;min-width:0;padding-inline:10px}.row #rev{flex:1 1 0;min-width:0;padding-inline:6px;font-size:13px}.row #gen{flex:1.25 1 0;min-width:0;padding-inline:8px}}
+/* معاينة الطباعة (هاتف وكمبيوتر): الورقة فقط بملء الشاشة */
+#pvBar{display:none}
+body.pv #pvBar{display:flex;position:fixed;top:0;left:0;right:0;z-index:70;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;background:#1b4b5f;color:#fff;box-shadow:0 2px 10px #0005}
+#pvBar .pvb{display:flex;gap:8px}#pvBar .btn{min-height:34px;padding:4px 14px}
+body.pv .top,body.pv .side,body.pv #mbar,body.pv .stat,body.pv .stbtn,body.pv .tplbar,body.pv #revNote,body.pv .pop{display:none!important}
+body.pv .main{display:block!important}
+body.pv .stage{position:fixed!important;inset:0;z-index:60;overflow:auto;background:#3d4448!important;padding:62px 12px 30px!important;margin:0!important;max-height:none!important;height:auto!important;border-radius:0!important}
+body.pv .ph{visibility:hidden}body.pv .pn,body.pv .mgs,body.pv .pbrk{display:none!important}body.pv .blank,body.pv .aihl{background:none!important}
+body.pv .a4{box-shadow:0 8px 28px #0009}body.pv #zoomBar{z-index:71}
+/* حالة المراسلة في الأرشيف */
+#arcF{margin:10px 0 4px}#arcF .chip b{font-weight:700;margin-inline-start:4px}
+.it .btn.stw{color:#8a4b0d;border-color:#f5a640}.it .btn.std{color:#1c7a52;border-color:#9fd4b9}
 @media print{
 @page{size:A4;margin:0}
 html,body{height:auto!important;background:#fff!important;display:block!important}
@@ -527,12 +539,14 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  <div class="r" id="varChips" style="margin-top:8px"></div>
  <div class="r"><button class="btn gold" id="tplSave" type="button" style="flex:1">✓ احفظ القالب</button><button class="btn alt" id="tplCancel" type="button">✕ إلغاء</button></div>
 </div>
-<div class="stat ok" id="stat"></div><button class="btn alt stbtn" id="saveQ" type="button">💾 حفظ في الأرشيف</button>
+<div class="stat ok" id="stat"></div><button class="btn alt stbtn" id="saveQ" type="button">💾 حفظ في الأرشيف</button><button class="btn alt stbtn" id="pvQ" type="button" title="شوف الورقة زي ما تنطبع">👁 معاينة</button>
 <div class="wrap" id="wrap"><div id="pages"></div></div></div>
 </div>
 
 <div class="hid" id="arcView"><div class="arch">
  <input type="text" id="q" placeholder="بحث في الأرشيف…">
+ <div class="chips" id="arcF"><span class="chip on" data-f="w">⏳ تحت العمل <b id="nW">0</b></span><span class="chip" data-f="d">✓ تمت الطباعة <b id="nD">0</b></span><span class="chip" data-f="a">الكل <b id="nA">0</b></span></div>
+ <div class="row" id="pallRow"><button class="btn" id="printAll" type="button" style="flex:1">🖨 جهّز كل «تحت العمل» في PDF واحد للطباعة</button></div>
  <div id="list"></div>
  <div class="row"><button class="btn alt" id="merge">دمج المحدد في PDF واحد</button></div>
  <div class="hint">كل مراسلاتك تتحفظ تلقائياً في حسابك (☁) أول ما تُكتب أو تتعدّل، وتظهر هنا على أي جهاز تسجّل فيه. حدد أكثر من مراسلة بالمربعات واضغط «دمج» لملف PDF واحد.</div>
@@ -564,6 +578,7 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
  <div class="row"><button class="btn" id="kSave" style="flex:1" type="button">حفظ</button><button class="btn alt" id="kCancel" type="button">إغلاق</button><button class="btn alt" id="kClear" type="button">مسح مفاتيحي</button></div>
 </div></div>
 <div class="toast" id="toast"></div>
+<div id="pvBar"><b>👁 معاينة الطباعة</b><span class="pvb"><button class="btn gold" id="pvPdf" type="button">⬇ PDF</button><button class="btn alt" id="pvX" type="button">✕ إغلاق</button></span></div>
 <nav id="mbar" aria-label="تنقل سريع"><button id="mbW" type="button"><span class="ic">✍</span>اكتب</button><button id="mbP" type="button"><span class="ic">📄</span>الورقة</button><button id="mbD" type="button" aria-label="تنزيل PDF"><span class="ic">⬇</span></button><button id="mbT" type="button"><span class="ic">📋</span>قوالب</button><button id="mbS" type="button"><span class="ic">➤</span>واتساب</button></nav>
 <div class="modal hid" id="syncModal"><div class="mbox">
  <h3 style="margin:0 0 6px">☁ حسابي</h3>
@@ -714,7 +729,7 @@ $("#pasteGo").onclick=()=>runCompose($("#paste").value.trim(),"#pasteGo","✓ ر
 async function runCompose(v,btn,label,ready){if(!v)return toast(ready?"الصق النص أولاً":"احكي أو اكتب شن تبي أولاً");
  $(btn).disabled=true;$(btn).innerHTML='<span class="spin">⟳</span> '+(ready?"يراجع ويرتّب…":"يحلل ويكتب…");
  try{last=await api("/api/compose",{text:ready?"[نص جاهز: راجعه ورتّبه، لا تعِد كتابته]\n"+v:v});LASTREQ=ready?"":v;
-  setBody(blocksToHtml(last.blocks||[]));CURID=null;autoArchive();applyAiFormat(last.format);
+  fmtDefault();setBody(blocksToHtml(last.blocks||[]));CURID=null;autoArchive();applyAiFormat(last.format);
   if(Array.isArray(last.cc)&&last.cc.length){last.cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});cc=CC.filter(c=>last.cc.includes(c));renderCks();drawBottom()}
   $("#fit").click();showAn();toast("النوع: "+(last.type||""));if(innerWidth<=820)setTimeout(()=>$(".stage").scrollIntoView({behavior:"smooth"}),300)}
  catch(e){toast("تعذر: "+e.message)}
@@ -887,8 +902,13 @@ function fmtApply(save){const st=pagesEl.style,F=FMT,mm=v=>v+"mm",pt=v=>v+"pt";
  st.setProperty("--mt",mm(F.mt));st.setProperty("--mb",mm(F.mb));st.setProperty("--mr",mm(F.mr));st.setProperty("--ml",mm(F.ml));
  st.setProperty("--clAlign",F.ctrCl?"center":"right");st.setProperty("--cxAlign",F.ctrCx?"center":"right");
  const w=$("#wrap").classList;w.toggle("ragged",!F.just);w.toggle("nocc",!F.showCc);w.toggle("nosig",!F.showSig);w.toggle("notyp",!F.showTyp);
- fmtUI();layoutAll();if(save)autoSave()}
-function fmtSet(id){const t=fmtAll().find(x=>x.id===id);if(!t)return;FMT={...FMT0,...t.f};FMTID=id;setLHBase(FMT.lh);fmtApply(true);$("#fit").click()}
+ fmtUI();layoutAll();if(save){autoSave();if(CURID!=null)autoArchive()}}
+const fmtNow=()=>({...FMT,lh:LHB});
+function fmtUse(f,fid){FMT={...FMT0,...f};FMTID=fid===undefined?null:fid;setLHBase(FMT.lh);fmtApply(false)}
+// التنسيق الافتراضي للمراسلات الجديدة: المحفوظ في الإعدادات، أو «أكبر خط» محلياً و«السابقة» في الموقع
+function fmtDefault(){const P=prefsGet();if(P&&P.fmt&&typeof P.fmt==="object")return fmtUse(P.fmt,P.fmtId);const t=fmtAll().find(x=>x.id===(LOCAL?"max":"prev"));fmtUse(t.f,t.id)}
+let FMTDEF=false;
+function fmtSet(id){const t=fmtAll().find(x=>x.id===id);if(!t)return;FMTDEF=true;FMT={...FMT0,...t.f};FMTID=id;setLHBase(FMT.lh);fmtApply(true);$("#fit").click()}
 $("#fs").onchange=e=>{if(e.target.value)fmtSet(e.target.value)};
 $("#fmtSave").onclick=()=>{const n=(prompt("اسم قالب التنسيق (مثال: تكليف قصير):","")||"").trim();if(!n)return;
  const L=fmtUserLoad(),id="u"+Date.now();L.push({id,u:Date.now(),name:n,f:{...FMT,lh:LHB}});fmtUserSave(L);FMTID=id;fmtSelRender();autoSave();toast("تم حفظ قالب التنسيق: "+n)};
@@ -911,7 +931,7 @@ function maxFit(){setLH(LHB);const ok=x=>{fsSet(x);return PN===1&&sigRoom()>=7};
  if(!ok(11)){fsSet(15);fmtUI();if(!QUIET)toast("النص أطول من صفحة، كمّل في صفحة ثانية");return}
  let lo=11,hi=26;if(ok(hi))lo=hi;else while(hi-lo>.1){const m=(lo+hi)/2;if(ok(m))lo=m;else hi=m}
  let x=Math.floor(lo*10)/10;fsSet(x);for(let g=0;g<12&&orphan()&&x-.25>=11;g++){x-=.25;fsSet(x)}
- fmtUI();autoSave();if(!QUIET)toast("صفحة واحدة: خط المتن "+(+x.toFixed(2))+"pt")}
+ fmtUI();autoSave();if(CURID!=null&&!ARCLOCK)autoArchive();if(!QUIET)toast("صفحة واحدة: خط المتن "+(+x.toFixed(2))+"pt")}
 $("#fit").onclick=()=>{if(FMT.auto)return maxFit();const B=LHB,mn=Math.max(1.3,B-.5);setLH(B);layoutAll();if(PN>1){for(let v=B-.05;v>=mn-.001;v-=.05){setLH(v.toFixed(2));layoutAll();if(PN===1)break}
  if(PN>1){setLH(B);layoutAll();toast("النص أطول من صفحة، انتقل للصفحة الثانية")}}else if(!QUIET)toast("صفحة واحدة بتباعد "+B.toFixed(2))};
 $("#bB").onclick=()=>document.execCommand("bold");
@@ -978,14 +998,25 @@ $("#wa").onclick=async()=>{const b=$("#wa");
   if(st==="fail"){WAP={blob:r.blob,name:r.name,sig};toast("الملف جاهز، اضغط الزر مرة ثانية لإكمال المشاركة");return}
   waFallback(r.blob,r.name)});
  if(WAP)b.innerHTML="➤ اضغط للإرسال (الملف جاهز)"};
+let PVR=null;
+function pvOpen(back){clearAiHl();PVR=back||null;document.body.classList.add("pv");$$(".body").forEach(b=>b.setAttribute("contenteditable","false"));setTimeout(()=>{scale();$(".stage").scrollTop=0},40)}
+function pvClose(){if(!document.body.classList.contains("pv"))return;document.body.classList.remove("pv");$$(".body").forEach(b=>b.setAttribute("contenteditable","true"));const r=PVR;PVR=null;if(r)r();setTimeout(scale,40)}
+$("#pvQ").onclick=()=>{if(!getBody().replace(/<[^>]*>/g,"").trim())return toast("الورقة فاضية");pvOpen()};
+$("#pvX").onclick=pvClose;document.addEventListener("keydown",e=>{if(e.key==="Escape")pvClose()});
+$("#pvPdf").onclick=()=>$("#pdf").click();
 $("#prt").onclick=()=>{clearAiHl();toast("اختر «حفظ بصيغة PDF» وألغِ الرؤوس والتذييلات");setTimeout(()=>window.print(),600)};
+// عدة مراسلات في PDF واحد (كل واحدة بملاءمتها)، ثم سؤال: نعلّمها «تمت الطباعة»؟
+async function mergePdf(ids,title){const xs=store.filter(y=>ids.includes(y.id)),keep={h:getBody(),cc:[...cc],last,id:CURID,f:fmtNow(),fid:FMTID},pdf=newPdf(),docs=[],q=QUIET;
+ ARCLOCK=true;clearTimeout(arcTm);QUIET=true;view(1);await new Promise(r=>setTimeout(r,250));
+ try{for(const x of xs){await arcPut(x);if(LOCAL){layoutAll();docs.push(snapDoc())}else await pagesToPdf(pdf)}}
+ finally{fmtUse(keep.f,keep.fid);setBody(keep.h);cc=keep.cc;last=keep.last;CURID=keep.id;renderCks();drawBottom();QUIET=q;ARCLOCK=false}
+ const d=new Date(),ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+ if(LOCAL){const j=await localPdf(docs,title+" "+ds);view(0);toast("✓ "+xs.length+" مراسلة في ملف واحد: "+j.name)}
+ else{dlBlob(pdf.output("blob"),title.replace(/\s+/g,"_")+"_"+ds+".pdf");view(0);toast("✓ "+xs.length+" مراسلة في ملف واحد")}
+ const pend=xs.filter(x=>x.w);if(pend.length&&confirm("علّم "+pend.length+" مراسلة «تمت الطباعة»؟"))setDone(pend,true)}
 $("#merge").onclick=()=>withBusy("#merge",async()=>{const ids=$$("#list [data-c]:checked").map(c=>+c.dataset.c);
- if(!ids.length)return toast("حدد مراسلة أو أكثر بالمربعات أولاً");
- ARCLOCK=true;clearTimeout(arcTm);const keep={h:getBody(),cc:[...cc],last},pdf=newPdf(),docs=[];view(1);await new Promise(r=>setTimeout(r,250));
- try{for(const x of store.filter(y=>ids.includes(y.id))){setBody(x.h);cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();await document.fonts.ready;await new Promise(r=>setTimeout(r,200));if(LOCAL)docs.push(snapDoc());else await pagesToPdf(pdf)}}
- finally{setBody(keep.h);cc=keep.cc;last=keep.last;renderCks();drawBottom();ARCLOCK=false}
- const d=new Date();if(LOCAL){const j=await localPdf(docs,"مراسلات مدمجة "+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"));view(0);return toast("✓ دمج "+ids.length+" مراسلة: "+j.name)}
- dlBlob(pdf.output("blob"),"مراسلات_مدمجة_"+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+".pdf");view(0);toast("تم دمج "+ids.length+" مراسلة في ملف واحد")});
+ if(!ids.length)return toast("حدد مراسلة أو أكثر بالمربعات أولاً");await mergePdf(ids,"مراسلات مدمجة")});
+$("#printAll").onclick=()=>withBusy("#printAll",async()=>{const ids=store.filter(x=>x.w).map(x=>x.id);if(!ids.length)return toast("ما فيش مراسلات تحت العمل");await mergePdf(ids,"للطباعة")});
 
 let store=[];try{store=JSON.parse(localStorage.getItem("awq2")||"[]")}catch(e){}
 let LARC=null;const larcPush=()=>{if(!LOCAL)return;clearTimeout(LARC);LARC=setTimeout(()=>fetch("/api/archive",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:store})}).catch(()=>{}),600)};
@@ -996,23 +1027,33 @@ let CURID=null,arcTm=null,ARCLOCK=false;
 function arcName(){const t=(last&&last.type)||"مراسلة",e=document.querySelector(".body .to"),to=e?e.innerText.replace(/^\s*(السيـد|السيد|السيدة|السادة)\s*\/?\s*/,"").trim():"";return (t+(to?" — "+to:"")).slice(0,70)}
 // PDF/واتساب لمراسلة من الأرشيف: تُعرض مؤقتاً على الورقة (بنفس التنسيق والملاءمة) ثم ترجع الورقة كما كانت
 const arcPdfName=x=>String(x.n||x.t||"مراسلة").replace(/[\\\/:*?"<>|\r\n]+/g,"").replace(/\s*—\s*/g," - ").trim().slice(0,80)+".pdf";
-async function arcRender(x,fn){const keep={h:getBody(),cc:[...cc],last,id:CURID},wasArc=$("#mainView").classList.contains("hid"),q=QUIET;
+async function arcShow(x){const keep={h:getBody(),cc:[...cc],last,id:CURID,f:fmtNow(),fid:FMTID},wasArc=$("#mainView").classList.contains("hid"),q=QUIET;
  ARCLOCK=true;clearTimeout(arcTm);QUIET=true;if(wasArc){view(1);await new Promise(r=>setTimeout(r,250))}
- try{setBody(x.h);cc=[...(x.cc||[])];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();await document.fonts.ready;$("#fit").click();await new Promise(r=>setTimeout(r,150));return await fn()}
- finally{setBody(keep.h);cc=keep.cc;last=keep.last;CURID=keep.id;renderCks();drawBottom();if(keep.h.replace(/<[^>]*>/g,"").trim())$("#fit").click();QUIET=q;ARCLOCK=false;if(wasArc)view(0)}}
+ await arcPut(x);
+ return ()=>{fmtUse(keep.f,keep.fid);setBody(keep.h);cc=keep.cc;last=keep.last;CURID=keep.id;renderCks();drawBottom();QUIET=q;ARCLOCK=false;if(wasArc)view(0)}}
+// يضع مراسلة الأرشيف على الورقة بتنسيقها المحفوظ (القديمة بلا تنسيق: الافتراضي + ملاءمة)
+async function arcPut(x){if(x.f)fmtUse(x.f,x.fid);else fmtDefault();setBody(x.h);cc=[...(x.cc||[])];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();await document.fonts.ready;
+ if(!x.f)$("#fit").click();else layoutAll();await new Promise(r=>setTimeout(r,150))}
+async function arcRender(x,fn){const back=await arcShow(x);try{return await fn()}finally{back()}}
 function arcTo(){const e=document.querySelector(".body .to");return e?e.innerText.trim():""}
 function arcTitle(){const b=$$(".body")[0];return(((b&&b.innerText)||"").split("\n").map(x=>x.trim()).find(Boolean)||"").slice(0,60)}
 function autoArchive(){clearTimeout(arcTm);arcTm=setTimeout(arcSave,1200)}
 function arcSave(){if(ARCLOCK||$("#wrap").classList.contains("tplmode"))return false;const h=getBody();if(!h.replace(/<[^>]*>/g,"").trim())return false;
  const now=Date.now(),s2=arcTitle(),ty=(last&&last.type)||"مراسلة",nm=arcName();let it=CURID!=null?store.find(x=>x.id===CURID):null;
- if(!it){it={id:now,u:now,t:ty,n:nm,h,s:s2,d:new Date().toLocaleDateString("ar-LY"),cc:[...cc],to:arcTo()};store.unshift(it);CURID=it.id;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
- if(it.h===h&&it.s===s2&&(it.named||it.n===nm)&&JSON.stringify(it.cc)===JSON.stringify(cc))return true;
- it.h=h;it.s=s2;it.cc=[...cc];it.t=ty;it.to=arcTo();if(!it.named)it.n=nm;it.u=now;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
+ if(!it){it={id:now,u:now,t:ty,n:nm,h,s:s2,d:new Date().toLocaleDateString("ar-LY"),cc:[...cc],to:arcTo(),w:1,f:fmtNow(),fid:FMTID};store.unshift(it);CURID=it.id;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
+ const fnow=fmtNow();if(it.h===h&&it.s===s2&&(it.named||it.n===nm)&&JSON.stringify(it.cc)===JSON.stringify(cc)&&JSON.stringify(it.f)===JSON.stringify(fnow))return true;
+ it.h=h;it.s=s2;it.cc=[...cc];it.t=ty;it.to=arcTo();it.f=fnow;it.fid=FMTID;if(!it.named)it.n=nm;it.u=now;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
 $("#saveQ").onclick=()=>$("#save").click();$("#save").onclick=()=>{clearTimeout(arcTm);if(!arcSave())return toast("ما فيه نص للحفظ");const it=store.find(x=>x.id===CURID);if(!it)return;
  const nm=prompt("اسم المراسلة في الأرشيف:",it.n||arcName());if(nm===null)return toast("✓ محفوظة في حسابك");const v=nm.trim();if(v){it.n=v;it.named=true;it.u=Date.now();persist();list()}toast("✓ محفوظة باسم: "+(it.n||""))};
-function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||(x.s||"").includes(q)||(x.n||"").includes(q)||(x.t||"").includes(q)||(x.to||"").includes(q)||(x.h||"").replace(/<[^>]*>/g,"").includes(q)).map(x=>`<div class="it"><input type="checkbox" data-c="${x.id}"><div class="t">${escH(x.n||x.s||"(بدون عنوان)")}<small>${x.d}</small></div><span class="tag">${x.t}</span><div class="ib"><button class="btn alt" data-o="${x.id}">فتح</button><button class="btn alt" data-r="${x.id}">تسمية</button><button class="btn alt" data-x="${x.id}">حذف</button><button class="btn alt" data-p="${x.id}" title="حفظ هذه المراسلة PDF">PDF</button><button class="btn alt" data-w="${x.id}" title="إرسال هذه المراسلة PDF عبر واتساب">واتساب</button></div></div>`).join("")||"<div style='padding:14px;color:#888'>لا توجد مراسلات محفوظة بعد.</div>";
- $$("[data-o]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.o);CURID=x.id;setBody(x.h);cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();view(1)});
+// w=1 «تحت العمل» (كل مراسلة جديدة)، وبدونها = «تمت الطباعة» (والمراسلات القديمة قبل الميزة)
+let ARCF="w";
+function list(){const q=$("#q").value,nw=store.filter(x=>x.w).length;$("#nW").textContent=nw;$("#nD").textContent=store.length-nw;$("#nA").textContent=store.length;
+ $$("#arcF .chip").forEach(c=>c.classList.toggle("on",c.dataset.f===ARCF));$("#pallRow").style.display=ARCF==="w"&&nw?"":"none";
+ $("#list").innerHTML=store.filter(x=>ARCF==="a"||(ARCF==="w"?!!x.w:!x.w)).filter(x=>!q||(x.s||"").includes(q)||(x.n||"").includes(q)||(x.t||"").includes(q)||(x.to||"").includes(q)||(x.h||"").replace(/<[^>]*>/g,"").includes(q)).map(x=>`<div class="it"><input type="checkbox" data-c="${x.id}"><div class="t">${escH(x.n||x.s||"(بدون عنوان)")}<small>${x.d}</small></div><span class="tag">${x.t}</span><div class="ib"><button class="btn alt ${x.w?"stw":"std"}" data-s="${x.id}" title="اضغط لتغيير الحالة">${x.w?"⏳ تحت العمل":"✓ تمت الطباعة"}</button><button class="btn alt" data-v="${x.id}">👁 معاينة</button><button class="btn alt" data-o="${x.id}">فتح</button><button class="btn alt" data-r="${x.id}">تسمية</button><button class="btn alt" data-x="${x.id}">حذف</button><button class="btn alt" data-p="${x.id}" title="حفظ هذه المراسلة PDF">PDF</button><button class="btn alt" data-w="${x.id}" title="إرسال هذه المراسلة PDF عبر واتساب">واتساب</button></div></div>`).join("")||"<div style='padding:14px;color:#888'>"+(ARCF==="w"?"ما فيش مراسلات تحت العمل.":ARCF==="d"?"ما فيش مراسلات مطبوعة بعد.":"لا توجد مراسلات محفوظة بعد.")+"</div>";
+ $$("[data-o]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.o);CURID=x.id;ARCLOCK=true;if(x.f)fmtUse(x.f,x.fid);else fmtDefault();setBody(x.h);ARCLOCK=false;cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();view(1)});
  $$("[data-r]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.r);if(!x)return;const nm=prompt("اسم المراسلة:",x.n||x.s||"");if(nm===null)return;const v=nm.trim();if(v){x.n=v;x.named=true;x.u=Date.now();persist();list()}});
+ $$("[data-s]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.s);if(!x)return;setDone([x],!!x.w);toast(x.w?"رجعت «تحت العمل»":"✓ تمت الطباعة")});
+ $$("[data-v]").forEach(b=>b.onclick=async()=>{const x=store.find(y=>y.id==b.dataset.v);if(!x)return;const back=await arcShow(x);pvOpen(back)});
  $$("[data-p]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.p);if(!x)return;const nm=arcPdfName(x);
   withBusy(b,()=>arcRender(x,async()=>{if(LOCAL){const j=await localPdf([snapDoc()],nm);toast("✓ انحفظ في «المستندات/مراسلات الأوقاف»: "+j.name)}else{const r=await makePDF(nm);dlBlob(r.blob,r.name);toast("تم تنزيل "+r.name)}}))});
  $$("[data-w]").forEach(b=>b.onclick=async()=>{const x=store.find(y=>y.id==b.dataset.w);if(!x)return;
@@ -1022,6 +1063,8 @@ function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||(
   if(st==="fail"){b._wa=R;b.textContent="➤ اضغط للإرسال";toast("الملف جاهز، اضغط الزر مرة ثانية لإكمال المشاركة");return}waFallback(R.blob,R.name)});
  $$("[data-x]").forEach(b=>b.onclick=()=>{if(LOCAL)fetch("/api/archive/"+b.dataset.x,{method:"DELETE"}).catch(()=>{});tomb("letter",b.dataset.x);store=store.filter(y=>y.id!=b.dataset.x);persist();list()})}
 $("#q").oninput=list;
+$$("#arcF .chip").forEach(c=>c.onclick=()=>{ARCF=c.dataset.f;list()});
+function setDone(xs,done){const now=Date.now();xs.forEach(x=>{if(done){delete x.w;x.pd=new Date().toLocaleDateString("ar-LY")}else{x.w=1;delete x.pd}x.u=now});persist();list()}
 function view(n){const m=n===2?"tpl":(n?"new":"arc");document.body.dataset.v=m;
  $("#mainView").classList.toggle("hid",m!=="new");$("#arcView").classList.toggle("hid",m!=="arc");$("#tplView").classList.toggle("hid",m!=="tpl");
  $("#tNew").classList.toggle("on",m==="new");$("#tArc").classList.toggle("on",m==="arc");$("#tTpl").classList.toggle("on",m==="tpl");
@@ -1101,7 +1144,7 @@ $("#tuGo").onclick=()=>{const t=TUSE;if(!t)return;const val={};
  $$("#tuFields [data-i]").forEach(e=>{const v=t.vars[+e.dataset.i];let x=e.value.trim();if(e.dataset.d&&x)x=x.replace(/-/g,"/");val[v.name]=x});
  const d=document.createElement("div");d.innerHTML=t.html;
  d.querySelectorAll(".var").forEach(sp=>{const x=val[sp.dataset.v];const tm=document.createElement("template");tm.innerHTML=x?dg(esc(x)):'<span class="blank">..............</span>';sp.replaceWith(tm.content)});
- $("#tplUse").classList.add("hid");view(1);last={type:t.type||t.name};setBody(d.innerHTML);CURID=null;autoArchive();
+ $("#tplUse").classList.add("hid");view(1);last={type:t.type||t.name};fmtDefault();setBody(d.innerHTML);CURID=null;autoArchive();
  cc=[...(t.cc||[])];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();$("#fit").click();toast("جاهزة: "+t.name);
  if(innerWidth<=820)setTimeout(()=>$(".stage").scrollIntoView({behavior:"smooth"}),300)};
 let TPLID=null;
@@ -1209,8 +1252,10 @@ function applyAiFormat(f){if(!f||typeof f!=="object")return 0;let n=0;
 const PD={sn:"عبدالرحيم أحمد شيتة",st:"رئيس قسم الإعلام",sw:"شيتة"},CC0=[...CC],CCSEL0=[...cc];
 let PREF_READY=false,prefTm=null;
 function prefsGet(){try{return JSON.parse(localStorage.getItem("awq_prefs")||"null")}catch(e){return null}}
-function prefsSnapshot(full){const old=prefsGet()||{};return {v:2,u:Date.now(),fmt:{...FMT,lh:LHB},fmtId:FMTID,sn:$("#sn").value,st:$("#st").value,sw:$("#sw").value,CC:[...CC],cc:full?[...cc]:old.cc}}
-function savePrefs(full){try{localStorage.setItem("awq_prefs",JSON.stringify(prefsSnapshot(full)))}catch(e){return false}syncSoon();return true}
+function prefsSnapshot(full){const old=prefsGet()||{},cur=full||FMTDEF,t0=fmtAll().find(x=>x.id===(LOCAL?"max":"prev"));
+ // الافتراضي يتغير فقط باختيار قالب تنسيق أو «احفظ إعداداتي»؛ تعديل ورقة بعينها يبقى معها في الأرشيف
+ const f=cur?{...FMT,lh:LHB}:old.fmt||{...FMT0,...t0.f},fid=cur?FMTID:old.fmt?old.fmtId:t0.id;return {v:2,u:Date.now(),fmt:f,fmtId:fid,sn:$("#sn").value,st:$("#st").value,sw:$("#sw").value,CC:[...CC],cc:full?[...cc]:old.cc}}
+function savePrefs(full){try{localStorage.setItem("awq_prefs",JSON.stringify(prefsSnapshot(full)))}catch(e){return false}FMTDEF=false;syncSoon();return true}
 function autoSave(){if(!PREF_READY)return;clearTimeout(prefTm);prefTm=setTimeout(()=>savePrefs(false),300)}
 function prefsApply(P){if(!P)return;
  if(P.fmt&&typeof P.fmt==="object"){FMT={...FMT0,...P.fmt};FMTID=P.fmtId===undefined?null:P.fmtId}
