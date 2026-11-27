@@ -817,7 +817,7 @@ const PXMM=3.7795,pagesEl=$("#pages");let sigChoice="last",PN=1,sigAt=0;
 function mkPage(i){const d=document.createElement("div");d.className="a4";
  d.innerHTML=`<div class="ph h">الترويسة المطبوعة مسبقاً<br>${i?"الصفحة "+(i+1):"الرقم الإشاري والتاريخ بخط اليد"}</div><div class="pg"><div class="body" contenteditable="true"></div><div class="sp"></div><div class="bot"><div class="cc">${CCH}</div><div class="sig"><div>${N1}</div><div>${N2}</div></div></div></div><div class="ph f">شريط العناوين المطبوع</div><div class="pn">${i+1}</div><div class="mgs"><i class="mg r" data-k="mr"></i><i class="mg l" data-k="ml"></i><i class="mg t" data-k="mt"></i><i class="mg b" data-k="mb"></i></div>`;
  const b=d.querySelector(".body");b.addEventListener("input",onEdit);b.addEventListener("mouseup",selUp);b.addEventListener("focusout",()=>setTimeout(()=>{if(needs())layoutAll()},50));return d}
-function avail(p){const pg=p.querySelector(".pg"),bt=p.querySelector(".bot");return pg.clientHeight-(bt.style.display=="flex"?bt.offsetHeight+15*PXMM:0)}
+function avail(p){const pg=p.querySelector(".pg"),bt=p.querySelector(".bot");return pg.clientHeight-(bt.style.display=="flex"?bt.offsetHeight:0)} // المتن يقدر يلصق للاسم والتوقيع بلا فراغ محجوز، والتوقيع ما ينتقلش إلا لو فعلاً ما فيش مكان
 function layout(sig){
  const blocks=[];$$(".body").forEach(b=>blocks.push(...b.children));blocks.forEach(b=>b.remove());pagesEl.innerHTML="";
  let i=0,page,body;const add=()=>{page=mkPage(i);pagesEl.appendChild(page);page.querySelector(".bot").style.display=i===sig?"flex":"none";body=page.querySelector(".body")};add();
@@ -927,7 +927,7 @@ function orphan(){for(const el of $$(".body p,.body li")){const ns=[],W=document
    for(let j=a.length-1;j>=0&&ws.length<2;j--){const r=document.createRange();r.setStart(ns[k],a[j][0]);r.setEnd(ns[k],a[j][1]);ws.push(r.getBoundingClientRect())}}
   if(ws.length===2&&ws[0].height&&Math.abs(ws[0].top-ws[1].top)>ws[0].height*.5)return el}return null}
 // أكبر خط للمتن (خطوة 0.1) يبقى معه النص صفحة واحدة مع ≥7مم للإمضاء، ثم ينزل 0.25 حتى تختفي الكلمة اليتيمة
-function maxFit(){setLH(LHB);const ok=x=>{fsSet(x);return PN===1&&sigRoom()>=7};
+function maxFit(){setLH(LHB);const ok=x=>{fsSet(x);return PN===1&&sigRoom()>=0};
  if(!ok(11)){fsSet(15);fmtUI();if(!QUIET)toast("النص أطول من صفحة، كمّل في صفحة ثانية");return}
  let lo=11,hi=26;if(ok(hi))lo=hi;else while(hi-lo>.1){const m=(lo+hi)/2;if(ok(m))lo=m;else hi=m}
  let x=Math.floor(lo*10)/10;fsSet(x);for(let g=0;g<12&&orphan()&&x-.25>=11;g++){x-=.25;fsSet(x)}
