@@ -351,7 +351,7 @@ details.sec>summary{font-size:14.5px}
 /* ---- مراجعة المقاسات: أرشيف، قوالب، رأس الصفحة ---- */
 .it{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"c t g" "b b b";gap:8px 10px;align-items:center}
 .it>input[type=checkbox]{grid-area:c}.it>.t{grid-area:t;min-width:0;overflow-wrap:anywhere;line-height:1.5}.it>.tag{grid-area:g;white-space:nowrap}
-.it>.ib{grid-area:b;display:flex;gap:8px}.it>.ib .btn{flex:1}
+.it>.ib{grid-area:b;display:flex;flex-wrap:wrap;gap:8px}.it>.ib .btn{flex:1}
 .tplcard{display:grid;grid-template-columns:1fr;gap:8px}
 .tplcard>.t{min-width:0;overflow-wrap:anywhere}
 .tplcard .btn{flex:1}
@@ -959,8 +959,8 @@ async function pagesToPdf(pdf){clearAiHl();await document.fonts.ready;if($("#mai
   pdfTextLayer(cv.getContext("2d"),pages[i],3);
   if(pdf._cnt)pdf.addPage([210,296.6]);pdf._cnt=(pdf._cnt||0)+1;pdf.addImage(cv.toDataURL("image/jpeg",.94),"JPEG",0,0,210,296.6)}}finally{pdfUnwords();pdfMarkers(false)}}
 const newPdf=()=>{if(!window.jspdf)throw new Error("مكتبة PDF ما تحملت");return new window.jspdf.jsPDF({unit:"mm",format:[210,296.6],orientation:"portrait",compress:true})};
-async function makePDF(){const pdf=newPdf(),name=pdfName();try{pdf.setProperties({title:name.replace(/\.pdf$/,""),creator:"مراسلاتي"})}catch(e){}await pagesToPdf(pdf);return {blob:pdf.output("blob"),name}}
-async function withBusy(id,fn){const b=$(id),o=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin">⟳</span> يجهّز…';try{await fn()}catch(e){toast("تعذر: "+e.message)}b.disabled=false;b.innerHTML=o}
+async function makePDF(nm){const pdf=newPdf(),name=nm||pdfName();try{pdf.setProperties({title:name.replace(/\.pdf$/,""),creator:"مراسلاتي"})}catch(e){}await pagesToPdf(pdf);return {blob:pdf.output("blob"),name}}
+async function withBusy(id,fn){const b=typeof id==="string"?$(id):id,o=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin">⟳</span> يجهّز…';try{await fn()}catch(e){toast("تعذر: "+e.message)}b.disabled=false;b.innerHTML=o}
 // نسخة ثابتة من الصفحة بدون سكربتات: الخادم يطبعها بـEdge (وسائط الطباعة = الورقة فقط)
 function snapDoc(){clearAiHl();const d=document.documentElement.cloneNode(true);d.querySelectorAll("script").forEach(x=>x.remove());
  const mv=d.querySelector("#mainView");if(mv)mv.classList.remove("hid");d.querySelectorAll(".aihl").forEach(x=>x.classList.remove("aihl"));return "<!doctype html>"+d.outerHTML}
@@ -994,6 +994,12 @@ async function larcLoad(){if(!LOCAL)return;try{const j=await (await fetch("/api/
  (j.items||[]).forEach(x=>{const o=M.get(x.id);if(!o||(x.u||0)>(o.u||0))M.set(x.id,x)});store=[...M.values()].sort((a,b)=>b.id-a.id);persist(false);list()}catch(e){}}
 let CURID=null,arcTm=null,ARCLOCK=false;
 function arcName(){const t=(last&&last.type)||"مراسلة",e=document.querySelector(".body .to"),to=e?e.innerText.replace(/^\s*(السيـد|السيد|السيدة|السادة)\s*\/?\s*/,"").trim():"";return (t+(to?" — "+to:"")).slice(0,70)}
+// PDF/واتساب لمراسلة من الأرشيف: تُعرض مؤقتاً على الورقة (بنفس التنسيق والملاءمة) ثم ترجع الورقة كما كانت
+const arcPdfName=x=>String(x.n||x.t||"مراسلة").replace(/[\\\/:*?"<>|\r\n]+/g,"").replace(/\s*—\s*/g," - ").trim().slice(0,80)+".pdf";
+async function arcRender(x,fn){const keep={h:getBody(),cc:[...cc],last,id:CURID},wasArc=$("#mainView").classList.contains("hid"),q=QUIET;
+ ARCLOCK=true;clearTimeout(arcTm);QUIET=true;if(wasArc){view(1);await new Promise(r=>setTimeout(r,250))}
+ try{setBody(x.h);cc=[...(x.cc||[])];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();await document.fonts.ready;$("#fit").click();await new Promise(r=>setTimeout(r,150));return await fn()}
+ finally{setBody(keep.h);cc=keep.cc;last=keep.last;CURID=keep.id;renderCks();drawBottom();if(keep.h.replace(/<[^>]*>/g,"").trim())$("#fit").click();QUIET=q;ARCLOCK=false;if(wasArc)view(0)}}
 function arcTo(){const e=document.querySelector(".body .to");return e?e.innerText.trim():""}
 function arcTitle(){const b=$$(".body")[0];return(((b&&b.innerText)||"").split("\n").map(x=>x.trim()).find(Boolean)||"").slice(0,60)}
 function autoArchive(){clearTimeout(arcTm);arcTm=setTimeout(arcSave,1200)}
@@ -1004,9 +1010,16 @@ function arcSave(){if(ARCLOCK||$("#wrap").classList.contains("tplmode"))return f
  it.h=h;it.s=s2;it.cc=[...cc];it.t=ty;it.to=arcTo();if(!it.named)it.n=nm;it.u=now;persist();if(!$("#arcView").classList.contains("hid"))list();return true}
 $("#saveQ").onclick=()=>$("#save").click();$("#save").onclick=()=>{clearTimeout(arcTm);if(!arcSave())return toast("ما فيه نص للحفظ");const it=store.find(x=>x.id===CURID);if(!it)return;
  const nm=prompt("اسم المراسلة في الأرشيف:",it.n||arcName());if(nm===null)return toast("✓ محفوظة في حسابك");const v=nm.trim();if(v){it.n=v;it.named=true;it.u=Date.now();persist();list()}toast("✓ محفوظة باسم: "+(it.n||""))};
-function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||(x.s||"").includes(q)||(x.n||"").includes(q)||(x.t||"").includes(q)||(x.to||"").includes(q)||(x.h||"").replace(/<[^>]*>/g,"").includes(q)).map(x=>`<div class="it"><input type="checkbox" data-c="${x.id}"><div class="t">${escH(x.n||x.s||"(بدون عنوان)")}<small>${x.d}</small></div><span class="tag">${x.t}</span><div class="ib"><button class="btn alt" data-o="${x.id}">فتح</button><button class="btn alt" data-r="${x.id}">تسمية</button><button class="btn alt" data-x="${x.id}">حذف</button></div></div>`).join("")||"<div style='padding:14px;color:#888'>لا توجد مراسلات محفوظة بعد.</div>";
+function list(){const q=$("#q").value;$("#list").innerHTML=store.filter(x=>!q||(x.s||"").includes(q)||(x.n||"").includes(q)||(x.t||"").includes(q)||(x.to||"").includes(q)||(x.h||"").replace(/<[^>]*>/g,"").includes(q)).map(x=>`<div class="it"><input type="checkbox" data-c="${x.id}"><div class="t">${escH(x.n||x.s||"(بدون عنوان)")}<small>${x.d}</small></div><span class="tag">${x.t}</span><div class="ib"><button class="btn alt" data-o="${x.id}">فتح</button><button class="btn alt" data-r="${x.id}">تسمية</button><button class="btn alt" data-x="${x.id}">حذف</button><button class="btn alt" data-p="${x.id}" title="حفظ هذه المراسلة PDF">PDF</button><button class="btn alt" data-w="${x.id}" title="إرسال هذه المراسلة PDF عبر واتساب">واتساب</button></div></div>`).join("")||"<div style='padding:14px;color:#888'>لا توجد مراسلات محفوظة بعد.</div>";
  $$("[data-o]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.o);CURID=x.id;setBody(x.h);cc=[...x.cc];cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});renderCks();drawBottom();view(1)});
  $$("[data-r]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.r);if(!x)return;const nm=prompt("اسم المراسلة:",x.n||x.s||"");if(nm===null)return;const v=nm.trim();if(v){x.n=v;x.named=true;x.u=Date.now();persist();list()}});
+ $$("[data-p]").forEach(b=>b.onclick=()=>{const x=store.find(y=>y.id==b.dataset.p);if(!x)return;const nm=arcPdfName(x);
+  withBusy(b,()=>arcRender(x,async()=>{if(LOCAL){const j=await localPdf([snapDoc()],nm);toast("✓ انحفظ في «المستندات/مراسلات الأوقاف»: "+j.name)}else{const r=await makePDF(nm);dlBlob(r.blob,r.name);toast("تم تنزيل "+r.name)}}))});
+ $$("[data-w]").forEach(b=>b.onclick=async()=>{const x=store.find(y=>y.id==b.dataset.w);if(!x)return;
+  if(b._wa){const p=b._wa;b._wa=null;b.textContent="واتساب";const r=await waSend(p.blob,p.name);if(r!=="ok"&&r!=="abort")waFallback(p.blob,p.name);return}
+  let R=null;await withBusy(b,async()=>{R=await arcRender(x,()=>makePDF(arcPdfName(x)))});if(!R)return;
+  const st=await waSend(R.blob,R.name);if(st==="ok"||st==="abort")return;
+  if(st==="fail"){b._wa=R;b.textContent="➤ اضغط للإرسال";toast("الملف جاهز، اضغط الزر مرة ثانية لإكمال المشاركة");return}waFallback(R.blob,R.name)});
  $$("[data-x]").forEach(b=>b.onclick=()=>{if(LOCAL)fetch("/api/archive/"+b.dataset.x,{method:"DELETE"}).catch(()=>{});tomb("letter",b.dataset.x);store=store.filter(y=>y.id!=b.dataset.x);persist();list()})}
 $("#q").oninput=list;
 function view(n){const m=n===2?"tpl":(n?"new":"arc");document.body.dataset.v=m;
