@@ -454,6 +454,10 @@ html,body{height:auto!important;background:#fff!important;display:block!importan
   <div class="chips" id="ex"><span class="l">ابدأ بـ:</span><span class="chip" data-t="نبي نكلف ">تكليف</span><span class="chip" data-t="نبي خطاب شكر لـ ">شكر</span><span class="chip" data-t="نبي دعوة لـ ">دعوة</span><span class="chip" data-t="نبي نطلب من ">طلب</span><span class="chip" data-t="نبي نفيد المدير بخصوص ">إفادة للمدير</span></div><div class="row"><button class="btn alt" id="mic">🎙 تكلم</button><button class="btn alt" id="rev" type="button" title="يراجع النص اللي على الورقة إملائياً ونحوياً وصياغةً، والفكرة تبقى">✎ مراجعة وتعديل</button><button class="btn" id="gen" style="flex:1">✦ حلل وصيغ</button></div>
   <div class="hint">الذكاء يفهم الطلب، يختار نوع المراسلة والمرسل إليه بنفسه، ويكتب الصيغة الأفضل بأسلوبك. للمراسلات المتكررة استعمل تبويب «مراسلات معتادة». كتبت أو عدّلت نص بيدك على الورقة؟ اضغط «مراجعة وتعديل» (فاضي = مراجعة عامة إملاء ونحو وصياغة، أو اكتب هنا تعليمة محددة مثل: اختصر، أضف فقرة).</div>
  </div>
+ <div class="sec" id="pasteSec"><h3><i>📋</i>عندك نص جاهز؟</h3>
+  <textarea id="paste" style="min-height:120px" placeholder="الصق هني نص المراسلة كامل (من وورد أو واتساب أو أي مكان). Claude يراجعه إملائياً ونحوياً وصياغةً، يرتّبه على شكل المراسلة الرسمية، ويحطه في الورقة، والفكرة والمعلومات تبقى زي ما هي."></textarea>
+  <div class="row"><button class="btn" id="pasteGo" type="button" style="flex:1">✓ راجعه وحطه في الورقة</button></div>
+ </div>
  <div class="hint" id="revNote" style="display:none"></div>
  <div class="hint" id="anNote" style="display:none;background:#e7f5ec;color:#17392b">✓ تم التحليل (قانونياً ولغوياً ونحوياً وصياغةً) في الخلفية، والمراسلة هي النسخة الأفضل بعد التحليل.</div>
  <div class="sec"><h3><i>2</i>التحرير</h3>
@@ -704,14 +708,17 @@ async function api(path,body){
   return gem("prompts/edit_prompt.md",["السياق (المراسلة كاملة):",body.context,"","الجزء المطلوب تعديله:",body.selection,"","الطلب: "+body.request].join(String.fromCharCode(10)),0.5)}
  const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
  if(r.status==401){location.href="/login";throw new Error("login")}const j=await r.json();if(!r.ok)throw new Error(j.error||"خطأ");return j}
-$("#gen").onclick=async()=>{const v=$("#topic").value.trim();if(!v)return toast("احكي أو اكتب شن تبي أولاً");
- $("#gen").disabled=true;$("#gen").innerHTML='<span class="spin">⟳</span> يحلل ويكتب…';
- try{last=await api("/api/compose",{text:v});LASTREQ=v;
+$("#gen").onclick=()=>runCompose($("#topic").value.trim(),"#gen","✦ حلل وصيغ",false);
+// نص جاهز ملصوق: يُراجع ويُرتّب على شكل المراسلة بنفس مسار التوليد (التعليمات في system_prompt.md «# النص الجاهز»)
+$("#pasteGo").onclick=()=>runCompose($("#paste").value.trim(),"#pasteGo","✓ راجعه وحطه في الورقة",true);
+async function runCompose(v,btn,label,ready){if(!v)return toast(ready?"الصق النص أولاً":"احكي أو اكتب شن تبي أولاً");
+ $(btn).disabled=true;$(btn).innerHTML='<span class="spin">⟳</span> '+(ready?"يراجع ويرتّب…":"يحلل ويكتب…");
+ try{last=await api("/api/compose",{text:ready?"[نص جاهز: راجعه ورتّبه، لا تعِد كتابته]\n"+v:v});LASTREQ=ready?"":v;
   setBody(blocksToHtml(last.blocks||[]));CURID=null;autoArchive();applyAiFormat(last.format);
   if(Array.isArray(last.cc)&&last.cc.length){last.cc.forEach(c=>{if(!CC.includes(c))CC.push(c)});cc=CC.filter(c=>last.cc.includes(c));renderCks();drawBottom()}
   $("#fit").click();showAn();toast("النوع: "+(last.type||""));if(innerWidth<=820)setTimeout(()=>$(".stage").scrollIntoView({behavior:"smooth"}),300)}
  catch(e){toast("تعذر: "+e.message)}
- $("#gen").disabled=false;$("#gen").textContent="✦ حلل وصيغ"};
+ $(btn).disabled=false;$(btn).textContent=label}
 function showAn(){const n=$("#anNote");n.style.display="block";const m=(last&&last.missing)||[];
  n.innerHTML=m.length?"⚠ ناقص: "+m.join("، "):"✓ تم التحليل (قانونياً ولغوياً ونحوياً وصياغةً) في الخلفية."}
 let aiMode=false,sr=null;
