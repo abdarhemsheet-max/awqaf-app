@@ -11,6 +11,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 LOCAL = os.environ.get("LOCAL", "1" if __name__ == "__main__" else "0") == "1"
 AI = os.environ.get("AI", "claude").lower()            # claude (اشتراكك عبر Claude Code) أو gemini (احتياطي)
 CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "sonnet")
+CLAUDE_EFFORT = os.environ.get("CLAUDE_EFFORT", "high")
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-3-flash-preview")
 FALLBACK_MODELS = ["gemini-3.1-flash-lite", "gemini-flash-latest"]
@@ -107,13 +108,15 @@ def _json_from(txt):
     m = re.search(r"\{[\s\S]*\}", txt)
     return json.loads(m.group(0) if m else txt)
 
-def ask_claude(system, user):
+def ask_claude(system, user, effort=None):
     """يشغّل Claude Code بدون واجهة: النص عبر stdin، والتعليمات من ملف (لا حدود لطول سطر الأوامر في ويندوز)."""
     exe = claude_exe()
     env = {k: v for k, v in os.environ.items()
            if not (k.startswith("CLAUDE_CODE") or k in ("CLAUDECODE", "ANTHROPIC_BASE_URL"))}
     cmd = [exe, "-p", "--output-format", "json", "--model", CLAUDE_MODEL, "--system-prompt-file", _sys_file(system),
            "--tools", "", "--no-session-persistence", "--strict-mcp-config", "--setting-sources", ""]
+    if effort:
+        cmd += ["--effort", effort]
     last = "تعذر الاتصال بـ Claude"
     for attempt in range(2):  # إعادة محاولة مرة واحدة إذا رجع JSON غير صالح
         try:
@@ -185,7 +188,8 @@ def gemini(system, user, temperature=0.4, thinking="minimal"):
 def ask(system, user, temperature=0.4, thinking="minimal"):
     if AI == "gemini" and GEMINI_KEY:
         return gemini(system, user, temperature, thinking)
-    return ask_claude(system, user)
+    # المراسلة والمراجعة: تفكير أعمق (المستخدم يفضّل أفضل صياغة على السرعة)؛ الباقي بالافتراضي
+    return ask_claude(system, user, CLAUDE_EFFORT if thinking == "low" else None)
 
 def today_line():
     """تاريخ اليوم (بتوقيت ليبيا UTC+2) ليحسب الذكاء «الأحد القادم» وأمثالها."""
